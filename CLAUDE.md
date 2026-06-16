@@ -51,7 +51,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 学習システムの使い方（このディレクトリの本来の用途）
 
-`学習プラン.md` に全体方針、`学習記録/週次計画.md` に進捗がある。作業の前にこの2つを読むこと。
+`study-plan.md` に全体方針、`学習記録/週次計画.md` に進捗がある。作業の前にこの2つを読むこと。
 
 ### 構成
 - `問題集/科目N_.../R0X.md` — PDFから抽出した構造化問題集。1問ごとに `論点`タグ＋問題文＋`<details>`内に正解・根拠・解説。**解説は必ず根拠（業法→条文 / 約款→項目 / 実務→計算手順）に紐づける**。
@@ -66,14 +66,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 3. 採点＋根拠つき解説。**正解でも「なぜ他が誤りか」を一言確認**させる（再認でなく想起を促す）。
 4. 間違えたら `誤答ログ.md` に論点・ミス種別・次回復習日を追記。
 5. セッション終わりに `週次計画.md` の日々のログ（学習時間・範囲・正答率）を更新。
-6. **ダッシュボードを更新**: `学習記録/進捗データ.json` の科目別 answered/attempted/correct/masteredTopics・reviewQueue・studyDays・dailyLog を更新し、**同じ値を `学習ダッシュボード.html` 内の `const DATA` にも反映**（HTMLは自己完結のため両方を同期する）。カウントダウンはJSが開いた日付から自動計算するので触らない。
 
-### ダッシュボード（`学習ダッシュボード.html`）
-試験カウントダウン・科目別到達度バー・総合到達度リング・全体周回数・復習待ち論点・学習日数・直近正答率を可視化したモチベ用の単体HTML。データは `学習記録/進捗データ.json` が正本で、HTML内 `DATA` はその写し。値が変わったら必ず両方更新する。
-- 指標の定義（重要）:
-  - **到達度** = 正答数 ÷ 全過去問数（科目別=perYear×years、総合=85×5=425）。「全範囲のうちどれだけ正解できるようになったか」。
-  - **周回数** = `answered`（延べ回答数、間隔反復の再演習も加算）÷ 全過去問数。同じ問題を解き直すと増える。
-  - **正答率** = correct ÷ attempted。質の指標で合格ライン60%の参照に使う（バーの色＝正答率、長さ＝到達度）。
-  - データ項目: `answered`=延べ回答数（周回用）、`attempted`=演習したユニーク問題数、`correct`=正答（到達度用）。
+※ このチャット型クイズとは別に、ブラウザで動く `index.html`（学習アプリ）がある。普段の演習はそちらで行い、エクスポートJSONを貼ってもらえば分析できる（下記）。
+
+## 学習アプリ / ダッシュボード（HTML, PWA）
+- `index.html` … 過去問クイズアプリ。`app_data.js`（`tools/build_app_data.py` 生成）を読み、進捗を `localStorage['domtrip_v1']` に保存（固定間隔SRS）。
+- `dashboard.html` … 同じ `localStorage['domtrip_v1']` と `app_data.js` から **ライブ集計**して表示（ハードコードDATAではない／同一オリジンで共有）。`学習記録/進捗データ.json` は旧方式の名残で現在は未使用。
+- 指標: **到達度**=正解した異なり札 ÷ 科目のカード総数 / **周回**=延べ回答 ÷ カード総数 / **正答率**=正答 ÷ 演習数。
+- 配信: GitHub Pages（https）で PWA 化（iOSは file:// だと localStorage 不可）。`問題集/*.md`・`cram-sheet.md` を編集したら `python3 tools/build_app_data.py` で `app_data.js` を再生成。
+- **進捗JSONの分析**: ユーザーがエクスポートJSON（`appId:"domtrip-quiz"`、`cards{id:{box,due,seen,correct,wrong}}`）を渡してきたら、`app_data.js`／`問題集/` の id と突き合わせ、苦手論点・科目別到達度・復習すべき札・誤答の解説を返す。このJSONは個人データなので公開リポジトリにコミットしない。
 
 新しい問題集を作るときは `問題集/科目1_旅行業法/R07.md` の形式（論点タグ・detailsで答え分離・末尾に正解一覧表）に倣う。

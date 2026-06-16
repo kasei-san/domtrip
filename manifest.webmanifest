@@ -2,7 +2,7 @@
   "name": "国内旅行 過去問アプリ",
   "short_name": "旅行過去問",
   "description": "国内旅行業務取扱管理者試験の過去問・間隔反復クイズ（オフライン）",
-  "start_url": "学習アプリ.html",
+  "start_url": "index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",

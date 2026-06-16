@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 問題集/*.md と 暗記シート.md をパースして 学習アプリ用の app_data.js を生成する。
+# 問題集/*.md と cram-sheet.md をパースして 学習アプリ用の app_data.js を生成する。
 # 出力: app_data.js  (const APP_DATA = {...};)
 import io, os, re, json, datetime, glob
 
@@ -63,8 +63,8 @@ def parse_question_file(path, subject, year):
     return cards
 
 def parse_flash_geo():
-    """暗記シート.md の都道府県別リストから flash カードを作る（観光地→県）。"""
-    path = os.path.join(ROOT, "暗記シート.md")
+    """cram-sheet.md の都道府県別リストから flash カードを作る（観光地→県）。"""
+    path = os.path.join(ROOT, "cram-sheet.md")
     if not os.path.exists(path):
         return []
     with io.open(path, encoding="utf-8") as f:

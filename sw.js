@@ -1,8 +1,9 @@
 // Service Worker: アプリ一式をキャッシュしてオフライン動作させる
-const CACHE = "domtrip-v1";
+const CACHE = "domtrip-v2";
 const ASSETS = [
   "./",
-  "学習アプリ.html",
+  "index.html",
+  "dashboard.html",
   "app_data.js",
   "manifest.webmanifest",
   "icon.svg",
@@ -22,6 +23,6 @@ self.addEventListener("fetch", (e) => {
       const copy = res.clone();
       caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
       return res;
-    }).catch(() => caches.match("学習アプリ.html")))
+    }).catch(() => caches.match("index.html")))
   );
 });
