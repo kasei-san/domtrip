@@ -1,7 +1,7 @@
 # オフライン学習アプリ 仕様（index.html）
 
 ## 目的
-通勤中の不安定回線でも使える、**完全オフライン**の間隔反復クイズアプリ。Ankiの代替（iPhone課金不要）。素材は既存の `問題集/`（R03〜R07×3科目・432問）と `cram-sheet.md`。学習履歴は `localStorage` に保存し、クリップボード経由で `dashboard.html` に反映する。
+通勤中の不安定回線でも使える、**完全オフライン**の間隔反復クイズアプリ。Ankiの代替（iPhone課金不要）。素材は既存の `questions/`（R03〜R07×3科目・432問）と `cram-sheet.md`。学習履歴は `localStorage` に保存し、クリップボード経由で `dashboard.html` に反映する。
 
 ## 成果物
 1. **`index.html`** — 問題データ・JS・CSSを全て埋め込んだ単一HTML（外部CDN/フォント/ライブラリ不使用）。

@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 含めてはいけないもの:
 - 実名・メールアドレス・電話番号・住所・SNSアカウント等の個人を特定する情報
-- **絶対パス（`/Users/<ユーザー名>/...`）やOSのユーザー名** → 必ず**相対パス**で書く（例: `問題集/科目1_旅行業法/R07.md`）
+- **絶対パス（`/Users/<ユーザー名>/...`）やOSのユーザー名** → 必ず**相対パス**で書く（例: `questions/subject1-law/R07.md`）
 - 勤務先・社内システム・社内URL・APIキー・トークン・パスワード等
 - 学習進捗などの個人データ（進捗はブラウザの localStorage に置き、リポジトリには入れない）
 
@@ -22,7 +22,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## ディレクトリ構成と命名規則
 
-過去問は `過去問/` 配下にあり、ファイル名は `R<年度><種別>.pdf` の形式。
+過去問は `past-exams/` 配下にあり、ファイル名は `R<年度><種別>.pdf` の形式。
 
 - `R03`〜`R07` = 令和3〜7年度（Reiwa）
 - `mondai` / `mondairei` = 問題（例）
@@ -51,13 +51,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 学習システムの使い方（このディレクトリの本来の用途）
 
-`study-plan.md` に全体方針、`学習記録/週次計画.md` に進捗がある。作業の前にこの2つを読むこと。
+`study-plan.md` に全体方針、`study-log/週次計画.md` に進捗がある。作業の前にこの2つを読むこと。
 
 ### 構成
-- `問題集/科目N_.../R0X.md` — PDFから抽出した構造化問題集。1問ごとに `論点`タグ＋問題文＋`<details>`内に正解・根拠・解説。**解説は必ず根拠（業法→条文 / 約款→項目 / 実務→計算手順）に紐づける**。
-- `学習記録/誤答ログ.md` — 間違えた問題を**論点単位＋ミス種別**で記録。間隔反復（翌日→3日後→1週間後…）で再出題する。
-- `学習記録/週次計画.md` — 12週スケジュールと日々のログ。
-- `分析/`・`ノート/` — 演習が進んでから後付けで作る（最初から作り込まない）。
+- `questions/subjectN-*/R0X.md` — PDFから抽出した構造化問題集。1問ごとに `論点`タグ＋問題文＋`<details>`内に正解・根拠・解説。**解説は必ず根拠（業法→条文 / 約款→項目 / 実務→計算手順）に紐づける**。
+- `study-log/誤答ログ.md` — 間違えた問題を**論点単位＋ミス種別**で記録。間隔反復（翌日→3日後→1週間後…）で再出題する。
+- `study-log/週次計画.md` — 12週スケジュールと日々のログ。
+- `analysis/`・`notes/` — 演習が進んでから後付けで作る（最初から作り込まない）。
 
 ### クイズモード（ユーザーが「クイズ」と言ったら起動）
 1. `誤答ログ.md` の復習キュー（次回復習日が来た論点）と、進行中の科目の問題集から出題範囲を決める。
@@ -71,9 +71,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 学習アプリ / ダッシュボード（HTML, PWA）
 - `index.html` … 過去問クイズアプリ。`app_data.js`（`tools/build_app_data.py` 生成）を読み、進捗を `localStorage['domtrip_v1']` に保存（固定間隔SRS）。
-- `dashboard.html` … 同じ `localStorage['domtrip_v1']` と `app_data.js` から **ライブ集計**して表示（ハードコードDATAではない／同一オリジンで共有）。`学習記録/進捗データ.json` は旧方式の名残で現在は未使用。
+- `dashboard.html` … 同じ `localStorage['domtrip_v1']` と `app_data.js` から **ライブ集計**して表示（ハードコードDATAではない／同一オリジンで共有）。`study-log/進捗データ.json` は旧方式の名残で現在は未使用。
 - 指標: **到達度**=正解した異なり札 ÷ 科目のカード総数 / **周回**=延べ回答 ÷ カード総数 / **正答率**=正答 ÷ 演習数。
-- 配信: GitHub Pages（https）で PWA 化（iOSは file:// だと localStorage 不可）。`問題集/*.md`・`cram-sheet.md` を編集したら `python3 tools/build_app_data.py` で `app_data.js` を再生成。
-- **進捗JSONの分析**: ユーザーがエクスポートJSON（`appId:"domtrip-quiz"`、`cards{id:{box,due,seen,correct,wrong}}`）を渡してきたら、`app_data.js`／`問題集/` の id と突き合わせ、苦手論点・科目別到達度・復習すべき札・誤答の解説を返す。このJSONは個人データなので公開リポジトリにコミットしない。
+- 配信: GitHub Pages（https）で PWA 化（iOSは file:// だと localStorage 不可）。`questions/*.md`・`cram-sheet.md` を編集したら `python3 tools/build_app_data.py` で `app_data.js` を再生成。
+- **進捗JSONの分析**: ユーザーがエクスポートJSON（`appId:"domtrip-quiz"`、`cards{id:{box,due,seen,correct,wrong}}`）を渡してきたら、`app_data.js`／`questions/` の id と突き合わせ、苦手論点・科目別到達度・復習すべき札・誤答の解説を返す。このJSONは個人データなので公開リポジトリにコミットしない。
 
-新しい問題集を作るときは `問題集/科目1_旅行業法/R07.md` の形式（論点タグ・detailsで答え分離・末尾に正解一覧表）に倣う。
+新しい問題集を作るときは `questions/subject1-law/R07.md` の形式（論点タグ・detailsで答え分離・末尾に正解一覧表）に倣う。

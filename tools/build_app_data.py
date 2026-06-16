@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-# 問題集/*.md と cram-sheet.md をパースして 学習アプリ用の app_data.js を生成する。
+# questions/*.md と cram-sheet.md をパースして 学習アプリ用の app_data.js を生成する。
 # 出力: app_data.js  (const APP_DATA = {...};)
 import io, os, re, json, datetime, glob
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SUBJECT_DIRS = {
-    "科目1": "問題集/科目1_旅行業法",
-    "科目2": "問題集/科目2_約款",
-    "科目3": "問題集/科目3_国内旅行実務",
+    "科目1": "questions/subject1-law",
+    "科目2": "questions/subject2-terms",
+    "科目3": "questions/subject3-practice",
 }
 CHOICE_RE = re.compile(r"^-?\s*([アイウエ])[\.\．、]\s*(.*)$")
 HEAD_RE = re.compile(r"^###\s+(.*)$")
