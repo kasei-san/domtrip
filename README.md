@@ -27,13 +27,21 @@ python3 -m http.server 8731
 # ブラウザで http://localhost:8731/index.html を開く
 ```
 
-### iPhone（推奨：GitHub Pages + ホーム画面追加）
-iOS Safari は `file://` だと localStorage が使えない（進捗が保存できない）。**https で配信して PWA化**するのが確実:
+### iPhone / ブラウザ（GitHub Pages で公開済み）
+公開URL: **https://kasei-san.github.io/domtrip/** （`index.html` がルート）
 
-1. このリポジトリを GitHub に push し、**Settings → Pages → Source: main / (root)** で公開（無料プランは public 必須）
-2. iPhone の Safari で `https://<ユーザー名>.github.io/<リポジトリ名>/index.html` を開く
-3. 共有ボタン →「ホーム画面に追加」
-4. 以降はアイコンから起動。Service Worker でキャッシュされ**機内モードでも動作**、進捗も保持される
+iOS Safari は `file://` だと localStorage が使えない（進捗が保存できない）ので、必ずこの https URL から使う:
+
+1. iPhone の Safari で <https://kasei-san.github.io/domtrip/> を開く
+2. 共有ボタン →「ホーム画面に追加」
+3. 以降はアイコンから起動。Service Worker でキャッシュされ**機内モードでも動作**、進捗も保持される
+
+> 更新の反映: `main` に push すれば数十秒で自動反映。Service Worker のキャッシュを確実に更新したいときは `sw.js` の `CACHE`（例 `domtrip-v2`）の版番号を上げる。
+
+### 複数人で使う場合
+このアプリに**サーバ・アカウント・共有DBはない**。進捗は各自のブラウザの localStorage に保存され、**人ごと・端末ごとに完全に独立**する（他人の進捗と混ざらない／どこにも送信されない）。同じURLを何人で開いても問題ない。
+- 注意: **同じ端末・同じブラウザを共有すると localStorage も共有**され進捗が混ざる。各自の端末／ブラウザ（または別プロファイル）で使うこと。
+- 進捗を別端末へ移すときは、アプリの「⬇ JSONで保存／📋 コピー」でエクスポート → 移行先で取り込む。
 
 ## 学習の流れ
 
