@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+> 👉 **作業開始時はまず `TODO.md` を読む**（次にやるべきこと・待ち事項がまとまっている）。
+
 ## ⚠️ 公開リポジトリ前提 — 個人情報を絶対に含めない
 
 このリポジトリは **GitHub Pages で一般公開する前提**である。コミットするファイル（md / html / js / json / スクリプト等）には**個人情報・機微情報を一切含めないこと**。
