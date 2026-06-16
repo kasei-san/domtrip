@@ -73,7 +73,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `index.html` … 過去問クイズアプリ。`app_data.js`（`tools/build_app_data.py` 生成）を読み、進捗を `localStorage['domtrip_v1']` に保存（固定間隔SRS）。
 - `dashboard.html` … 同じ `localStorage['domtrip_v1']` と `app_data.js` から **ライブ集計**して表示（ハードコードDATAではない／同一オリジンで共有）。`study-log/進捗データ.json` は旧方式の名残で現在は未使用。
 - 指標: **到達度**=正解した異なり札 ÷ 科目のカード総数 / **周回**=延べ回答 ÷ カード総数 / **正答率**=正答 ÷ 演習数。
-- 配信: GitHub Pages（https）で PWA 化（iOSは file:// だと localStorage 不可）。`questions/*.md`・`cram-sheet.md` を編集したら `python3 tools/build_app_data.py` で `app_data.js` を再生成。
+- `questions/*.md`・`cram-sheet.md` を編集したら **`python3 tools/build_app_data.py`** で `app_data.js` を再生成（編集→再生成を忘れると公開サイトに反映されない）。
 - **進捗JSONの分析**: ユーザーがエクスポートJSON（`appId:"domtrip-quiz"`、`cards{id:{box,due,seen,correct,wrong}}`）を渡してきたら、`app_data.js`／`questions/` の id と突き合わせ、苦手論点・科目別到達度・復習すべき札・誤答の解説を返す。このJSONは個人データなので公開リポジトリにコミットしない。
+
+## デプロイ / 公開（GitHub Pages）
+- 公開済み。リポジトリ `kasei-san/domtrip`（public）、Pages source = `main` / `(root)`、Enforce HTTPS = ON。
+- 公開URLは**カスタムドメイン** `kasei-san.com` 配下: アプリ <https://kasei-san.com/domtrip/>（`index.html`）／ダッシュボード `/dashboard.html`／暗記シート `/cram-sheet.html`。`kasei-san.github.io/domtrip/` は kasei-san.com へリダイレクト。
+- **`main` に push すれば数十秒で自動デプロイ**。`git push origin main` は deny ルールで弾かれるが、追跡済みブランチなので **bare `git push`** で反映できる（ユーザーが push を任せることがある）。
+- Service Worker のキャッシュ更新を強制したいときは `sw.js` の `CACHE`（`domtrip-vN`）の版番号を上げる。iOSは file:// だと localStorage 不可なので必ず https URL から使う。
+
+## 科目3 図表問題と著作権（重要な方針）
+- 科目3には運賃計算図・地図・時刻表など図表依存の設問が多い。これらは本文を作り込まず「【図表は過去問PDF参照】＋正解＋解説」に留めている（図表は再現・捏造しない）。
+- **過去問の図表を画像として公開リポジトリに置かない**（試験問題の再配布にあたる懸念）。図を扱うなら ①チャットでユーザーが貼った画像を読んで解説する ②どうしても埋め込むなら `.gitignore` 済みのローカル専用フォルダに限定（公開しない）。
 
 新しい問題集を作るときは `questions/subject1-law/R07.md` の形式（論点タグ・detailsで答え分離・末尾に正解一覧表）に倣う。
