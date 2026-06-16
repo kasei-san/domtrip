@@ -1,0 +1,18 @@
+{
+  "examWindowStart": "2026-09-03",
+  "examTarget": "2026-09-17",
+  "examWindowEnd": "2026-09-25",
+  "passLine": 60,
+  "totalPerYear": 85,
+  "years": 5,
+  "subjects": [
+    { "key": "科目1", "name": "旅行業法", "color": "#43a047", "perYear": 25, "extracted": 25, "answered": 5, "attempted": 5, "correct": 2, "masteredTopics": 0 },
+    { "key": "科目2", "name": "約款", "color": "#1e88e5", "perYear": 25, "extracted": 0, "answered": 0, "attempted": 0, "correct": 0, "masteredTopics": 0 },
+    { "key": "科目3", "name": "国内旅行実務", "color": "#fb8c00", "perYear": 35, "extracted": 0, "answered": 0, "attempted": 0, "correct": 0, "masteredTopics": 0 }
+  ],
+  "reviewQueue": 4,
+  "studyDays": 1,
+  "dailyLog": [
+    { "date": "06-16", "rate": 40, "count": 5 }
+  ]
+}

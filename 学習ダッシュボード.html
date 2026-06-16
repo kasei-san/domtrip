@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🫛 国内旅行業務取扱管理者試験 学習ダッシュボード</title>
+<style>
+  :root{ --zunda:#43a047; --zunda-d:#2e7d32; --bg:#f1f8e9; }
+  *{box-sizing:border-box}
+  body{font-family:-apple-system,"Hiragino Sans","Yu Gothic",sans-serif;margin:0;background:var(--bg);color:#263238;padding:24px}
+  .wrap{max-width:1000px;margin:0 auto}
+  h1{font-size:1.4rem;margin:0 0 4px;color:var(--zunda-d)}
+  .sub{color:#607d8b;font-size:.85rem;margin-bottom:20px}
+  .grid{display:grid;gap:16px}
+  .cards{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+  .card{background:#fff;border-radius:14px;padding:18px 20px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+  .card h2{font-size:1rem;margin:0 0 12px;display:flex;align-items:center;gap:8px}
+  .dot{width:12px;height:12px;border-radius:50%;display:inline-block}
+  /* countdown */
+  .hero{background:linear-gradient(135deg,var(--zunda),#66bb6a);color:#fff;border-radius:18px;padding:22px 26px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px}
+  .hero .big{font-size:3.2rem;font-weight:800;line-height:1}
+  .hero .lbl{font-size:.8rem;opacity:.9}
+  .hero .right{text-align:right;font-size:.85rem;line-height:1.6}
+  /* progress bar */
+  .bar{position:relative;background:#eceff1;border-radius:999px;height:26px;overflow:hidden;margin:10px 0 6px}
+  .fill{height:100%;border-radius:999px;transition:width .8s ease;display:flex;align-items:center;justify-content:flex-end;color:#fff;font-size:.8rem;font-weight:700;padding-right:8px}
+  .passline{position:absolute;top:-4px;bottom:-4px;left:60%;width:2px;background:#d32f2f}
+  .passlabel{position:absolute;top:-16px;left:60%;transform:translateX(-50%);font-size:.62rem;color:#d32f2f;font-weight:700;white-space:nowrap}
+  .meta{font-size:.82rem;color:#546e7a;display:flex;justify-content:space-between}
+  .badge{display:inline-block;font-size:.7rem;padding:2px 8px;border-radius:999px;font-weight:700}
+  .b-go{background:#c8e6c9;color:#2e7d32}.b-mid{background:#fff3c4;color:#f57f17}.b-low{background:#ffcdd2;color:#c62828}.b-none{background:#eceff1;color:#90a4ae}
+  /* ring */
+  .ringwrap{display:flex;align-items:center;gap:18px}
+  .ring{transform:rotate(-90deg)}
+  .ringtxt{font-size:2rem;font-weight:800;color:var(--zunda-d)}
+  /* mini log */
+  .log{display:flex;align-items:flex-end;gap:6px;height:90px;margin-top:8px}
+  .logcol{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+  .logbar{width:100%;max-width:34px;background:var(--zunda);border-radius:5px 5px 0 0;transition:height .6s}
+  .logd{font-size:.65rem;color:#90a4ae}
+  .stat{font-size:2rem;font-weight:800;color:var(--zunda-d)}
+  .statlbl{font-size:.78rem;color:#607d8b}
+  .msg{background:#fffde7;border-left:5px solid #fbc02d;padding:12px 16px;border-radius:8px;margin-top:16px;font-size:.9rem}
+  .foot{text-align:center;color:#b0bec5;font-size:.72rem;margin-top:20px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🫛 国内旅行業務取扱管理者試験 学習ダッシュボード</h1>
+  <div class="sub" id="subtitle"></div>
+
+  <div class="hero">
+    <div>
+      <div class="lbl">試験まで（9月中旬目安）</div>
+      <div><span class="big" id="cd">--</span> <span style="font-size:1.2rem">日</span></div>
+    </div>
+    <div class="right" id="herright"></div>
+  </div>
+
+  <div class="grid cards" style="margin-bottom:16px">
+    <div class="card">
+      <h2>📊 総合到達度</h2>
+      <div class="ringwrap">
+        <svg width="120" height="120" class="ring" id="ring"></svg>
+        <div>
+          <div class="ringtxt" id="overall">--%</div>
+          <div class="statlbl" id="overalldesc">全過去問のうち正解できた割合</div>
+          <div style="margin-top:8px;font-size:.85rem;color:#546e7a">合格目安まで <b id="avgacc">-</b>（全問の<span id="passref"></span>%正解）</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>🔄 全体の周回数</h2>
+      <div class="stat" id="laps">-</div>
+      <div class="statlbl" id="lapsdesc">全過去問を何周したか（延べ回答数÷全問数）</div>
+      <div style="height:10px"></div>
+      <div style="display:flex;gap:18px">
+        <div><div class="stat" style="font-size:1.5rem" id="review">-</div><div class="statlbl">🔁 復習待ち論点</div></div>
+        <div><div class="stat" style="font-size:1.5rem" id="days">-</div><div class="statlbl">🔥 学習日数</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>📈 直近の正答率</h2>
+      <div class="log" id="log"></div>
+    </div>
+  </div>
+
+  <div class="grid cards" id="subjects"></div>
+
+  <div class="msg" id="message"></div>
+  <div class="foot">データ更新: 学習記録/進捗データ.json を編集 → このHTMLの DATA を同期して再生成。カウントダウンは開いた日付で自動計算。</div>
+</div>
+
+<script>
+const DATA = {
+  examWindowStart: "2026-09-03",
+  examTarget: "2026-09-17",
+  examWindowEnd: "2026-09-25",
+  passLine: 60,
+  totalPerYear: 85,
+  years: 5,
+  subjects: [
+    { key:"科目1", name:"旅行業法", color:"#43a047", perYear:25, extracted:25, answered:5, attempted:5, correct:2, masteredTopics:0 },
+    { key:"科目2", name:"約款", color:"#1e88e5", perYear:25, extracted:0, answered:0, attempted:0, correct:0, masteredTopics:0 },
+    { key:"科目3", name:"国内旅行実務", color:"#fb8c00", perYear:35, extracted:0, answered:0, attempted:0, correct:0, masteredTopics:0 }
+  ],
+  reviewQueue: 4,
+  studyDays: 1,
+  dailyLog: [ { date:"06-16", rate:40, count:5 } ]
+};
+
+const pass = DATA.passLine;
+const totalQ = s => s.perYear * DATA.years;            // 全過去問数（5年分）
+// 正答率＝到達度 = 正答数 / 全過去問数（母数はすべて全過去問に統一）
+const reach = s => Math.round(s.correct / totalQ(s) * 100);
+
+// countdown
+const today = new Date();
+const days = d => Math.ceil((new Date(d+"T00:00:00") - today) / 86400000);
+document.getElementById("cd").textContent = Math.max(0, days(DATA.examTarget));
+document.getElementById("herright").innerHTML =
+  `受験ウィンドウ: ${DATA.examWindowStart} 〜 ${DATA.examWindowEnd}（CBT）<br>`+
+  `ウィンドウ開始まで ${Math.max(0,days(DATA.examWindowStart))} 日 / 推奨日(${DATA.examTarget})まで ${Math.max(0,days(DATA.examTarget))} 日<br>`+
+  `合格基準: <b>3科目すべて ${pass}% 以上</b>`;
+const totalUniverse = DATA.totalPerYear * DATA.years;
+const totalCorrect = DATA.subjects.reduce((a,s)=>a+s.correct,0);
+document.getElementById("subtitle").textContent =
+  `合格は全科目${pass}点超の足切り型。到達度＝全過去問${totalUniverse}問（${DATA.years}年分）のうち正解できた割合なのだ。`;
+
+// subjects
+const sc = document.getElementById("subjects");
+DATA.subjects.forEach(s=>{
+  const tq = totalQ(s);
+  const r = reach(s);               // 正答率＝到達度（全過去問が母数）
+  const target = Math.ceil(tq * pass / 100); // 合格目安の正答数（全問の60%）
+  const laps = (s.answered / tq).toFixed(2);  // 周回数
+  let cls="b-none", txt="未着手", fillColor="#cfd8dc";
+  if(s.answered>0){
+    fillColor=s.color;
+    if(r>=pass){cls="b-go";txt="正答率"+r+"% 合格圏👍";}
+    else if(r>=40){cls="b-mid";txt="正答率"+r+"% あと一歩";}
+    else {cls="b-low";txt="正答率"+r+"% 育成中";}
+  }
+  sc.insertAdjacentHTML("beforeend",`
+    <div class="card">
+      <h2><span class="dot" style="background:${s.color}"></span>${s.key} ${s.name}
+        <span class="badge ${cls}" style="margin-left:auto">${txt}</span></h2>
+      <div class="bar">
+        <span class="passlabel">合格${pass}%</span><span class="passline"></span>
+        <div class="fill" style="width:${Math.max(r, r>0?2:0)}%;background:${fillColor}">${r>0?r+"%":""}</div>
+      </div>
+      <div class="meta"><span>正答 ${s.correct}/${tq}問（全過去問）</span><span>合格目安 ${target}問正解</span></div>
+      <div class="meta" style="margin-top:4px"><span>🔄 周回 ${laps} 周（延べ${s.answered}/${tq}）</span><span>${s.extracted===0?"問題集これから":"問題集化 "+s.extracted+"問"}</span></div>
+    </div>`);
+});
+
+// overall ring = 総合到達度 = 全正答数 / 全過去問数
+const overall = Math.round(totalCorrect / totalUniverse * 100);
+const overallExact = (totalCorrect / totalUniverse * 100);
+document.getElementById("overall").textContent = (overallExact<1 && totalCorrect>0 ? overallExact.toFixed(1) : overall)+"%";
+const R=52, C=2*Math.PI*R;
+document.getElementById("ring").innerHTML=`
+  <circle cx="60" cy="60" r="${R}" fill="none" stroke="#eceff1" stroke-width="12"/>
+  <circle cx="60" cy="60" r="${R}" fill="none" stroke="#43a047"
+    stroke-width="12" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-Math.max(overallExact,totalCorrect>0?1.5:0)/100)}"/>`;
+
+const attempted = DATA.subjects.filter(s=>s.answered>0);
+const passTarget = Math.ceil(totalUniverse * pass / 100); // 合格目安の総正答数
+// 総周回数
+const totalAnswered = DATA.subjects.reduce((a,s)=>a+s.answered,0);
+const totalLaps = (totalAnswered / totalUniverse).toFixed(2);
+
+document.getElementById("overalldesc").textContent = `全過去問${totalUniverse}問のうち正解 ${totalCorrect}問`;
+document.getElementById("avgacc").textContent = totalCorrect+"/"+passTarget+"問";
+document.getElementById("passref").textContent = pass;
+document.getElementById("laps").textContent = totalLaps+" 周";
+document.getElementById("lapsdesc").textContent = `全過去問${totalUniverse}問を何周したか（延べ${totalAnswered}回答）`;
+document.getElementById("review").textContent = DATA.reviewQueue;
+document.getElementById("days").textContent = DATA.studyDays;
+
+// daily log
+const lg=document.getElementById("log");
+DATA.dailyLog.slice(-10).forEach(d=>{
+  lg.insertAdjacentHTML("beforeend",`
+    <div class="logcol" title="${d.count}問">
+      <div style="font-size:.62rem;color:#607d8b;font-weight:700">${d.rate}%</div>
+      <div class="logbar" style="height:${Math.max(6,d.rate*0.8)}px;background:${d.rate>=pass?'#43a047':d.rate>=40?'#fbc02d':'#ef5350'}"></div>
+      <div class="logd">${d.date}</div>
+    </div>`);
+});
+
+// message（母数は全過去問。序盤は数字が小さいので積み上げを励ます）
+let m;
+if(attempted.length===0) m="まだ演習ゼロなのだ。まず1問解くところから始めるのだ！🫛";
+else if(overall>=pass) m=`合格目安(${passTarget}問)を超えたのだ！全${totalUniverse}問のうち${totalCorrect}問正解、もう仕上げ段階なのだ🎉`;
+else m=`全${totalUniverse}問のうち${totalCorrect}問正解。合格目安は${passTarget}問正解なのだ。1問ずつ正答を積めば到達度バーが伸びていくのだ💪 周回${totalLaps}周、コツコツ回すのだ！`;
+document.getElementById("message").textContent = m;
+</script>
+</body>
+</html>
