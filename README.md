@@ -28,11 +28,11 @@ python3 -m http.server 8731
 ```
 
 ### iPhone / ブラウザ（GitHub Pages で公開済み）
-公開URL: **https://kasei-san.github.io/domtrip/** （`index.html` がルート）
+公開URL: **https://kasei-san.com/domtrip/** （`index.html` がルート）
 
 iOS Safari は `file://` だと localStorage が使えない（進捗が保存できない）ので、必ずこの https URL から使う:
 
-1. iPhone の Safari で <https://kasei-san.github.io/domtrip/> を開く
+1. iPhone の Safari で <https://kasei-san.com/domtrip/> を開く
 2. 共有ボタン →「ホーム画面に追加」
 3. 以降はアイコンから起動。Service Worker でキャッシュされ**機内モードでも動作**、進捗も保持される
 
