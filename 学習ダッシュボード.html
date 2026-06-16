@@ -88,31 +88,69 @@
   <div class="grid cards" id="subjects"></div>
 
   <div class="msg" id="message"></div>
-  <div class="foot">データ更新: 学習記録/進捗データ.json を編集 → このHTMLの DATA を同期して再生成。カウントダウンは開いた日付で自動計算。</div>
+
+  <div class="card">
+    <h2>📥 別端末の進捗を取り込む（任意）</h2>
+    <div class="statlbl">同じサイト上で学習アプリを使っていれば進捗は自動反映されるのだ。別の端末/ブラウザの進捗を見たいときだけ、アプリの「エクスポート」JSONをここに貼って取り込むのだ。</div>
+    <textarea id="impText" rows="3" placeholder="エクスポートしたJSONを貼り付け" style="margin-top:8px"></textarea>
+    <div class="row" style="margin-top:8px"><button class="primary" onclick="importJson()" style="border:none;border-radius:10px;padding:10px 14px;background:#43a047;color:#fff;font-weight:700">取り込んで更新</button>
+    <button onclick="clearImport()" style="border:none;border-radius:10px;padding:10px 14px;background:#eceff1">取込をクリア</button></div>
+    <div class="statlbl" id="impMsg" style="margin-top:6px"></div>
+  </div>
+
+  <div class="foot">進捗は学習アプリと同じ localStorage を直接読んでライブ表示。GitHub Pages（同一オリジン）ではアプリの学習がそのまま反映される。カウントダウンは開いた日付で自動計算。</div>
 </div>
 
+<script src="app_data.js"></script>
 <script>
-const DATA = {
-  examWindowStart: "2026-09-03",
-  examTarget: "2026-09-17",
-  examWindowEnd: "2026-09-25",
-  passLine: 60,
-  totalPerYear: 85,
-  years: 5,
+// 静的設定（試験日・科目メタ）
+const CONFIG = {
+  examWindowStart: "2026-09-03", examTarget: "2026-09-17", examWindowEnd: "2026-09-25",
+  passLine: 60, years: 5,
   subjects: [
-    { key:"科目1", name:"旅行業法", color:"#43a047", perYear:25, extracted:125, answered:5, attempted:5, correct:2, masteredTopics:0 },
-    { key:"科目2", name:"約款", color:"#1e88e5", perYear:25, extracted:125, answered:0, attempted:0, correct:0, masteredTopics:0 },
-    { key:"科目3", name:"国内旅行実務", color:"#fb8c00", perYear:35, extracted:175, answered:0, attempted:0, correct:0, masteredTopics:0 }
-  ],
-  reviewQueue: 4,
-  studyDays: 1,
-  dailyLog: [ { date:"06-16", rate:40, count:5 } ]
+    { key:"科目1", name:"旅行業法", color:"#43a047" },
+    { key:"科目2", name:"約款", color:"#1e88e5" },
+    { key:"科目3", name:"国内旅行実務", color:"#fb8c00" }
+  ]
 };
+const PROG_KEY = "domtrip_v1";          // 学習アプリと同じキー（同一オリジンで共有）
+const IMPORT_KEY = "domtrip_dash_import"; // 別端末から取り込んだ進捗
+function readProgress(){
+  try{ const raw=localStorage.getItem(PROG_KEY); if(raw) return JSON.parse(raw); }catch(e){}
+  try{ const imp=localStorage.getItem(IMPORT_KEY); if(imp) return JSON.parse(imp); }catch(e){}
+  return null;
+}
+// localStorage進捗 + app_data.js のカード定義から DATA を動的生成
+function deriveData(){
+  const prog = readProgress();
+  const cards = (window.APP_DATA ? APP_DATA.cards : []);
+  const todayStr = new Date().toISOString().slice(0,10);
+  const subjects = CONFIG.subjects.map(meta=>{
+    const list = cards.filter(c=>c.subject===meta.key);
+    let answered=0, correctDistinct=0;
+    list.forEach(c=>{ const st = prog&&prog.cards ? prog.cards[c.id] : null;
+      if(st){ answered += st.seen||0; if((st.correct||0)>0) correctDistinct++; } });
+    return { ...meta, cardTotal:list.length||1, extracted:list.length, answered, correct:correctDistinct };
+  });
+  let reviewQueue=0;
+  if(prog&&prog.cards) Object.values(prog.cards).forEach(st=>{ if(st.due&&st.due<=todayStr) reviewQueue++; });
+  const dailyLog = (prog&&prog.daily?prog.daily:[]).map(d=>({
+    date:(d.date||"").slice(5), rate:d.answered?Math.round(d.correct/d.answered*100):0, count:d.answered||0 }));
+  return { ...CONFIG, subjects, reviewQueue, studyDays:(prog&&prog.streak)||0, dailyLog };
+}
+function importJson(){
+  const v=document.getElementById("impText").value.trim();
+  try{ const d=JSON.parse(v); if(d.appId!=="domtrip-quiz"||!d.cards) throw 0;
+    localStorage.setItem(IMPORT_KEY, JSON.stringify(d));
+    document.getElementById("impMsg").textContent="取り込んだのだ。再読み込みするのだ…"; location.reload();
+  }catch(e){ document.getElementById("impMsg").textContent="JSONが正しくないのだ（アプリのエクスポートを貼ってほしいのだ）"; }
+}
+function clearImport(){ try{localStorage.removeItem(IMPORT_KEY);}catch(e){} location.reload(); }
 
+const DATA = deriveData();
 const pass = DATA.passLine;
-const totalQ = s => s.perYear * DATA.years;            // 全過去問数（5年分）
-// 正答率＝到達度 = 正答数 / 全過去問数（母数はすべて全過去問に統一）
-const reach = s => Math.round(s.correct / totalQ(s) * 100);
+const totalQ = s => s.cardTotal || 1;        // その科目のカード総数
+const reach = s => Math.round(s.correct / totalQ(s) * 100);  // 到達度=正解した異なり札/総数
 
 // countdown
 const today = new Date();
@@ -122,7 +160,7 @@ document.getElementById("herright").innerHTML =
   `受験ウィンドウ: ${DATA.examWindowStart} 〜 ${DATA.examWindowEnd}（CBT）<br>`+
   `ウィンドウ開始まで ${Math.max(0,days(DATA.examWindowStart))} 日 / 推奨日(${DATA.examTarget})まで ${Math.max(0,days(DATA.examTarget))} 日<br>`+
   `合格基準: <b>3科目すべて ${pass}% 以上</b>`;
-const totalUniverse = DATA.totalPerYear * DATA.years;
+const totalUniverse = DATA.subjects.reduce((a,s)=>a+s.cardTotal,0);
 const totalCorrect = DATA.subjects.reduce((a,s)=>a+s.correct,0);
 document.getElementById("subtitle").textContent =
   `合格は全科目${pass}点超の足切り型。到達度＝全過去問${totalUniverse}問（${DATA.years}年分）のうち正解できた割合なのだ。`;
