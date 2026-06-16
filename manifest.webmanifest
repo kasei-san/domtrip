@@ -1,0 +1,15 @@
+{
+  "name": "国内旅行 過去問アプリ",
+  "short_name": "旅行過去問",
+  "description": "国内旅行業務取扱管理者試験の過去問・間隔反復クイズ（オフライン）",
+  "start_url": "学習アプリ.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f1f8e9",
+  "theme_color": "#43a047",
+  "lang": "ja",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

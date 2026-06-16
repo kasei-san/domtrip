@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>🫛 国内旅行 過去問アプリ</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#43a047">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="旅行過去問">
+<link rel="apple-touch-icon" href="icon.svg">
+<style>
+  :root{--z:#43a047;--zd:#2e7d32;--bg:#f1f8e9;--ng:#ef5350;--ok:#43a047}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{font-family:-apple-system,"Hiragino Sans","Yu Gothic",sans-serif;margin:0;background:var(--bg);color:#263238;padding:env(safe-area-inset-top) 0 0}
+  .wrap{max-width:640px;margin:0 auto;padding:16px 16px 40px}
+  h1{font-size:1.15rem;margin:0 0 2px;color:var(--zd)}
+  .muted{color:#78909c;font-size:.8rem}
+  .warn{background:#fff3e0;border-left:5px solid #fb8c00;padding:8px 12px;border-radius:8px;font-size:.82rem;margin:10px 0}
+  button{font:inherit;cursor:pointer;border:none;border-radius:10px;padding:12px 14px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+  button.primary{background:var(--z);color:#fff;font-weight:700}
+  button:active{transform:scale(.98)}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .card{background:#fff;border-radius:14px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,.06);margin:12px 0}
+  .pill{font-size:.7rem;padding:3px 9px;border-radius:999px;background:#e8f5e9;color:var(--zd);font-weight:700}
+  .choices{display:flex;flex-direction:column;gap:10px;margin:14px 0}
+  .ch{display:flex;gap:10px;align-items:flex-start;border:2px solid #e0e0e0;border-radius:10px;padding:12px;background:#fff;text-align:left;width:100%}
+  .ch.sel{border-color:var(--z);background:#f1f8e9}
+  .ch.correct{border-color:var(--ok);background:#e8f5e9}
+  .ch.wrong{border-color:var(--ng);background:#ffebee}
+  .ch .k{font-weight:800;color:var(--zd);min-width:1.4em}
+  .expl{background:#fafafa;border-radius:10px;padding:12px;font-size:.9rem;white-space:pre-wrap;line-height:1.7;margin-top:8px}
+  .stat{display:flex;justify-content:space-between;font-size:.9rem;padding:4px 0;border-bottom:1px dashed #e0e0e0}
+  .bar{background:#eceff1;border-radius:999px;height:18px;overflow:hidden;position:relative;margin:4px 0}
+  .fill{height:100%;background:var(--z);border-radius:999px}
+  select,textarea{font:inherit;border:1px solid #cfd8dc;border-radius:8px;padding:8px;width:100%;background:#fff}
+  .seg{display:flex;gap:6px;flex-wrap:wrap}
+  .seg button{flex:1;min-width:70px;padding:9px;font-size:.85rem}
+  .seg button.on{background:var(--z);color:#fff}
+  .big{font-size:1.6rem;font-weight:800;color:var(--zd)}
+  .hidden{display:none}
+  a.dl{display:inline-block;text-decoration:none}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#263238;color:#fff;padding:10px 16px;border-radius:999px;font-size:.85rem;opacity:0;transition:.3s;pointer-events:none}
+  .toast.show{opacity:1}
+  .flag{color:#e65100;font-size:.75rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🫛 国内旅行業務取扱管理者試験 過去問アプリ</h1>
+  <div class="muted" id="sub">読み込み中…</div>
+  <div id="warn"></div>
+  <div id="screen"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="app_data.js"></script>
+<script>
+"use strict";
+const $ = (id)=>document.getElementById(id);
+const KEY = "domtrip_v1";
+const NEW_LIMIT = 20;
+const INTERVALS = {1:1,2:3,3:7,4:16,5:35};
+const today = ()=> new Date().toISOString().slice(0,10);
+const addDays = (d,n)=>{ const t=new Date(d+"T00:00:00"); t.setDate(t.getDate()+n); return t.toISOString().slice(0,10); };
+const cards = (window.APP_DATA?APP_DATA.cards:[]);
+let sessionMode=false;
+
+// ---------- 永続化（file:// 不可環境を考慮）----------
+let STATE = { cards:{}, daily:[], streak:0, lastStudied:null };
+function loadState(){
+  try{ const raw=localStorage.getItem(KEY); if(raw) STATE=Object.assign(STATE,JSON.parse(raw)); }
+  catch(e){ sessionMode=true; }
+}
+function saveState(){
+  if(sessionMode) return;
+  try{ localStorage.setItem(KEY, JSON.stringify(STATE)); }
+  catch(e){ sessionMode=true; renderWarn(); }
+}
+function diagnose(){
+  try{ localStorage.setItem("_t","1"); localStorage.removeItem("_t"); }
+  catch(e){ sessionMode=true; }
+}
+
+// ---------- 統計 ----------
+function statsBySubject(){
+  const s={};
+  ["科目1","科目2","科目3"].forEach(k=>s[k]={total:0,answered:0,correct:0,correctDistinct:0});
+  cards.forEach(c=>{
+    const sub=s[c.subject]; if(!sub) return; sub.total++;
+    const st=STATE.cards[c.id];
+    if(st){ sub.answered+=(st.seen||0); sub.correct+=(st.correct||0); if((st.correct||0)>0) sub.correctDistinct++; }
+  });
+  return s;
+}
+function totals(){
+  let answered=0,correct=0,distinct=0,seenCards=0;
+  cards.forEach(c=>{const st=STATE.cards[c.id]; if(st){answered+=st.seen||0;correct+=st.correct||0;if((st.correct||0)>0)distinct++;if(st.seen)seenCards++;}});
+  return {answered,correct,distinct,seenCards,total:cards.length};
+}
+function dueCount(filter){
+  const t=today(); let n=0;
+  filterCards(filter).forEach(c=>{const st=STATE.cards[c.id]; if(st && st.due && st.due<=t) n++;});
+  return n;
+}
+
+// ---------- フィルタ＆セッション ----------
+let FILTER={subject:"all",year:"all",mode:"mcq"};
+function filterCards(f){
+  return cards.filter(c=>{
+    if(f.subject!=="all" && c.subject!==f.subject) return false;
+    if(f.year!=="all" && c.year!==f.year) return false;
+    if(f.mode==="mcq" && c.type!=="mcq") return false;
+    if(f.mode==="review" && c.type!=="review") return false;
+    if(f.mode==="flash" && c.type!=="flash") return false;
+    if(f.mode==="weak"){ const st=STATE.cards[c.id]; if(!(st && st.box===1 && st.seen)) return false; }
+    return true;
+  });
+}
+let QUEUE=[], qIdx=0, sessAnswered=0, sessCorrect=0;
+function buildQueue(){
+  const t=today(); const pool=filterCards(FILTER);
+  const due=[], fresh=[];
+  pool.forEach(c=>{ const st=STATE.cards[c.id];
+    if(st){ if(st.due && st.due<=t) due.push(c); }
+    else fresh.push(c);
+  });
+  shuffle(due); shuffle(fresh);
+  const news = FILTER.mode==="weak" ? [] : fresh.slice(0, NEW_LIMIT);
+  QUEUE = due.concat(news);
+  if(QUEUE.length===0) QUEUE = pool.slice(); // 全部復習済みなら全件から
+  shuffle(QUEUE); qIdx=0; sessAnswered=0; sessCorrect=0;
+}
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }
+
+// ---------- 採点＆SRS ----------
+function grade(card, ok){
+  const id=card.id; const st=STATE.cards[id] || {box:1,due:null,seen:0,correct:0,wrong:0,last:null};
+  st.seen++; sessAnswered++;
+  if(ok){ st.correct++; sessCorrect++; st.box=Math.min((st.box||1)+1,5); }
+  else { st.wrong++; st.box=1; }
+  const iv = ok ? INTERVALS[st.box] : 1;
+  st.due = addDays(today(), iv); st.last=today();
+  STATE.cards[id]=st;
+  // daily
+  const t=today(); let d=STATE.daily.find(x=>x.date===t);
+  if(!d){ d={date:t,answered:0,correct:0}; STATE.daily.push(d); }
+  d.answered++; if(ok) d.correct++;
+  // streak
+  if(STATE.lastStudied!==t){
+    if(STATE.lastStudied===addDays(t,-1)) STATE.streak=(STATE.streak||0)+1;
+    else STATE.streak=1;
+    STATE.lastStudied=t;
+  }
+  saveState();
+}
+
+// ---------- 画面 ----------
+function renderWarn(){
+  $("warn").innerHTML = sessionMode
+    ? '<div class="warn">⚠️ この環境では進捗が保存できないのだ（セッションのみ）。<b>iPhoneはfile://だと保存不可</b>。GitHub Pages等のhttpsで開くか、こまめに「エクスポート」でJSONバックアップを取るのだ。</div>'
+    : '';
+}
+function home(){
+  const t=totals(); const s=statsBySubject();
+  const rate = t.answered? Math.round(t.correct/t.answered*100):0;
+  const reach = Math.round(t.distinct/t.total*100);
+  let h = `<div class="card">
+    <div class="row" style="justify-content:space-between"><div><div class="big">${reach}%</div><div class="muted">到達度（正解した札 ${t.distinct}/${t.total}）</div></div>
+    <div style="text-align:right"><div class="big">${rate}%</div><div class="muted">正答率（延べ）</div></div></div>
+    <div class="row" style="margin-top:8px"><span class="pill">🔥 ${STATE.streak||0}日連続</span><span class="pill">本日の復習 ${dueCount(FILTER)}</span><span class="pill">延べ ${t.answered}問</span></div>
+  </div>`;
+  // 科目別バー
+  h += `<div class="card"><b>科目別 到達度</b>`;
+  ["科目1","科目2","科目3"].forEach(k=>{ const x=s[k]; const r=x.total?Math.round(x.correctDistinct/x.total*100):0;
+    h+=`<div style="margin-top:8px"><div class="stat"><span>${k}</span><span>${x.correctDistinct}/${x.total}（${r}%）</span></div><div class="bar"><div class="fill" style="width:${r}%"></div></div></div>`; });
+  h += `</div>`;
+  // フィルタ
+  const years=["all","R03","R04","R05","R06","R07"];
+  h += `<div class="card"><b>出題範囲</b>
+    <div style="margin:8px 0"><div class="muted">モード</div><div class="seg" id="segMode">
+      ${seg("mode","mcq","4択")}${seg("mode","review","解答リビュー")}${seg("mode","flash","暗記カード")}${seg("mode","weak","苦手復習")}</div></div>
+    <div class="row"><div style="flex:1"><div class="muted">科目</div><select id="selSub">
+      ${["all","科目1","科目2","科目3"].map(v=>`<option value="${v}" ${FILTER.subject===v?"selected":""}>${v==="all"?"全科目":v}</option>`).join("")}</select></div>
+    <div style="flex:1"><div class="muted">年度</div><select id="selYear">
+      ${years.map(v=>`<option value="${v}" ${FILTER.year===v?"selected":""}>${v==="all"?"全年度":v}</option>`).join("")}</select></div></div>
+    <div class="muted" id="poolInfo" style="margin-top:8px"></div>
+    <button class="primary" style="width:100%;margin-top:10px" onclick="start()">学習開始 ▶</button>
+  </div>`;
+  h += `<div class="card"><b>データ</b><div class="muted">進捗の正本はこのJSON。端末移行・バックアップに使うのだ。</div>
+    <div class="row" style="margin-top:8px"><button onclick="exportFile()">⬇ JSONで保存</button><button onclick="exportCopy()">📋 コピー</button>
+    <button onclick="showImport()">⬆ 復元（読込/貼付）</button></div>
+    <div id="importBox"></div></div>`;
+  $("screen").innerHTML=h;
+  $("selSub").onchange=e=>{FILTER.subject=e.target.value;updatePool();};
+  $("selYear").onchange=e=>{FILTER.year=e.target.value;updatePool();};
+  $("segMode").querySelectorAll("button").forEach(b=>b.onclick=()=>{FILTER.mode=b.dataset.v;home();});
+  updatePool();
+}
+function seg(group,val,label){ return `<button data-v="${val}" class="${FILTER[group]===val?"on":""}">${label}</button>`; }
+function updatePool(){ const n=filterCards(FILTER).length; const el=$("poolInfo"); if(el) el.textContent=`対象 ${n}問（うち本日の復習 ${dueCount(FILTER)}問）`; }
+
+function start(){ buildQueue(); if(QUEUE.length===0){ toast("対象の問題がないのだ"); return;} showQuestion(); }
+function showQuestion(){
+  if(qIdx>=QUEUE.length){ return sessionEnd(); }
+  const c=QUEUE[qIdx];
+  const isMulti = c.answer.length>1;
+  let h=`<div class="card">
+    <div class="row" style="justify-content:space-between"><span class="pill">${c.subject}・${c.year} ${c.qno}</span><span class="muted">${qIdx+1}/${QUEUE.length}</span></div>
+    <div style="margin:6px 0;font-size:.78rem;color:#90a4ae">論点: ${esc(c.topic)}</div>
+    ${c.flagged?'<div class="flag">⚠️ この設問は公式解答の読取に注意（要確認）</div>':''}
+    <div style="margin:10px 0;line-height:1.7">${esc(c.stem)||"（本文は過去問PDF参照）"}</div>`;
+  if(c.type==="mcq"){
+    h+=`<div class="choices" id="choices">`+c.choices.map(ch=>
+      `<button class="ch" data-k="${ch.k}" onclick="pick('${ch.k}',${isMulti})"><span class="k">${ch.k}</span><span>${esc(ch.text)}</span></button>`).join("")+`</div>`;
+    h+=isMulti?`<div class="muted">複数選択なのだ（すべて選ぶ）</div><button class="primary" style="width:100%;margin-top:8px" onclick="answerMcq(true)">解答する</button>`
+              :`<div class="muted">タップで解答なのだ</div>`;
+  } else {
+    h+=`<button class="primary" style="width:100%" onclick="reveal()">答えを見る</button>`;
+  }
+  h+=`<div id="result"></div></div>`;
+  h+=`<button onclick="home()">← ホーム</button>`;
+  $("screen").innerHTML=h;
+  picked.clear();
+}
+let picked=new Set();
+function pick(k,multi){
+  const el=document.querySelector(`.ch[data-k="${k}"]`);
+  if(multi){ if(picked.has(k)){picked.delete(k);el.classList.remove("sel");} else {picked.add(k);el.classList.add("sel");} }
+  else { picked=new Set([k]); answerMcq(false); }
+}
+function answerMcq(multi){
+  const c=QUEUE[qIdx];
+  if(picked.size===0){ toast("選択してほしいのだ"); return; }
+  const correct=new Set(c.answer);
+  const ok = picked.size===correct.size && [...picked].every(k=>correct.has(k));
+  document.querySelectorAll(".ch").forEach(el=>{ const k=el.dataset.k;
+    el.onclick=null;
+    if(correct.has(k)) el.classList.add("correct");
+    else if(picked.has(k)) el.classList.add("wrong");
+  });
+  grade(c, ok);
+  showResult(ok, c);
+}
+function reveal(){
+  const c=QUEUE[qIdx];
+  $("result").innerHTML=`<div class="expl"><b>正解: ${c.answer.join("・")||"（PDF参照）"}</b>\n${esc(stripMd(c.explanation))}</div>
+    <div class="row" style="margin-top:10px"><button class="primary" style="flex:1" onclick="selfGrade(true)">✓ できた</button>
+    <button style="flex:1;background:#ffcdd2" onclick="selfGrade(false)">✗ できなかった</button></div>`;
+}
+function selfGrade(ok){ grade(QUEUE[qIdx], ok); qIdx++; showQuestion(); }
+function showResult(ok,c){
+  $("result").innerHTML=`<div style="margin-top:10px;font-weight:800;color:${ok?'var(--ok)':'var(--ng)'}">${ok?'⭕ 正解なのだ！':'❌ 不正解なのだ'} （正解: ${c.answer.join("・")}）</div>
+    <div class="expl">${esc(stripMd(c.explanation))}</div>
+    <button class="primary" style="width:100%;margin-top:10px" onclick="next()">次へ ▶</button>`;
+}
+function next(){ qIdx++; showQuestion(); }
+function sessionEnd(){
+  const r=sessAnswered?Math.round(sessCorrect/sessAnswered*100):0;
+  $("screen").innerHTML=`<div class="card" style="text-align:center">
+    <div class="big">おつかれさまなのだ🫛</div>
+    <div style="margin:10px 0">このセッション ${sessAnswered}問 / 正解 ${sessCorrect}問（${r}%）</div>
+    <button class="primary" style="width:100%" onclick="start()">もう一周</button>
+    <button style="width:100%;margin-top:8px" onclick="home()">ホームへ</button></div>`;
+}
+
+// ---------- エクスポート/インポート ----------
+function buildExport(){
+  const s=statsBySubject(); const subjects={};
+  Object.keys(s).forEach(k=>subjects[k]={answered:s[k].answered,correct:s[k].correct,correctDistinct:s[k].correctDistinct});
+  return { schemaVersion:1, appId:"domtrip-quiz", exportedAt:today(), cardCount:Object.keys(STATE.cards).length,
+    subjects, streak:STATE.streak||0, lastStudied:STATE.lastStudied, daily:STATE.daily, cards:STATE.cards };
+}
+function exportFile(){
+  const blob=new Blob([JSON.stringify(buildExport(),null,2)],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download=`domtrip進捗_${today()}.json`; document.body.appendChild(a); a.click(); a.remove();
+  toast("JSONを保存したのだ");
+}
+async function exportCopy(){
+  const txt=JSON.stringify(buildExport());
+  try{ await navigator.clipboard.writeText(txt); toast("クリップボードにコピーしたのだ"); }
+  catch(e){ showImport(txt); toast("手動でコピーしてほしいのだ"); }
+}
+function showImport(prefill){
+  $("importBox").innerHTML=`<div style="margin-top:10px"><input type="file" accept="application/json" id="impFile">
+    <div class="muted" style="margin:6px 0">または貼り付け↓</div>
+    <textarea id="impText" rows="4" placeholder="エクスポートしたJSON">${prefill?esc(typeof prefill==="string"?prefill:""):""}</textarea>
+    <button class="primary" style="width:100%;margin-top:6px" onclick="doImportText()">この内容で復元</button></div>`;
+  const f=$("impFile"); if(f) f.onchange=e=>{ const file=e.target.files[0]; if(!file)return; const r=new FileReader();
+    r.onload=()=>{ applyImport(r.result); }; r.readAsText(file); };
+  if(typeof prefill==="string"){ const ta=$("impText"); ta.focus(); ta.select(); }
+}
+function doImportText(){ applyImport($("impText").value); }
+function applyImport(raw){
+  let d; try{ d=JSON.parse(raw); }catch(e){ toast("JSONが壊れているのだ"); return; }
+  if(!d || d.appId!=="domtrip-quiz" || !d.cards){ toast("形式が違うのだ"); return; }
+  STATE={ cards:d.cards||{}, daily:d.daily||[], streak:d.streak||0, lastStudied:d.lastStudied||null };
+  saveState(); toast("進捗を復元したのだ"); home();
+}
+
+// ---------- util ----------
+function esc(s){ return (s==null?"":String(s)).replace(/[&<>]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[m])); }
+function stripMd(s){ return (s||"").replace(/\*\*/g,"").replace(/^\s*-\s/gm,"・").trim(); }
+let toastT;
+function toast(m){ const el=$("toast"); el.textContent=m; el.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove("show"),1800); }
+
+// ---------- 起動 ----------
+function boot(){
+  if(!window.APP_DATA){ $("sub").textContent="app_data.js が読み込めなかったのだ"; return; }
+  diagnose(); loadState(); renderWarn();
+  $("sub").textContent=`全${APP_DATA.totals.all}枚（4択${APP_DATA.totals.byType.mcq}・リビュー${APP_DATA.totals.byType.review}・暗記${APP_DATA.totals.byType.flash||0}）／データ ${APP_DATA.generatedAt}`;
+  home();
+  if("serviceWorker" in navigator && location.protocol.startsWith("http")){
+    navigator.serviceWorker.register("sw.js").catch(()=>{});
+  }
+}
+boot();
+</script>
+</body>
+</html>
