@@ -2,6 +2,11 @@
 
 過去問（R03〜R07）を構造化し、**完全オフラインで動く間隔反復クイズアプリ**・**進捗ダッシュボード**・**暗記シート**で合格（3科目すべて60点以上）を目指す自己学習システム。
 
+## 公開ページ（GitHub Pages）
+- 📱 **学習アプリ（クイズ）**: <https://kasei-san.com/domtrip/>
+- 📊 **ダッシュボード**: <https://kasei-san.com/domtrip/dashboard.html>
+- 📝 **暗記シート（通勤用）**: <https://kasei-san.com/domtrip/cram-sheet.html>
+
 ## 何があるか
 
 | ファイル / フォルダ | 役割 |
