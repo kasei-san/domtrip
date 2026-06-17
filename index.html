@@ -63,7 +63,8 @@
 "use strict";
 const $ = (id)=>document.getElementById(id);
 const KEY = "domtrip_v1";
-const NEW_LIMIT = 20;
+const SESSION_LIMIT = 5;   // 1セッションの出題数（復習＋新規の合計）
+const NEW_LIMIT = SESSION_LIMIT;
 const INTERVALS = {1:1,2:3,3:7,4:16,5:35};
 const today = ()=> new Date().toISOString().slice(0,10);
 const addDays = (d,n)=>{ const t=new Date(d+"T00:00:00"); t.setDate(t.getDate()+n); return t.toISOString().slice(0,10); };
@@ -133,7 +134,8 @@ function buildQueue(){
   const news = FILTER.mode==="weak" ? [] : fresh.slice(0, NEW_LIMIT);
   QUEUE = due.concat(news);
   if(QUEUE.length===0) QUEUE = pool.slice(); // 全部復習済みなら全件から
-  shuffle(QUEUE); qIdx=0; sessAnswered=0; sessCorrect=0;
+  shuffle(QUEUE); QUEUE = QUEUE.slice(0, SESSION_LIMIT); // セッション全体を上限内に収める
+  qIdx=0; sessAnswered=0; sessCorrect=0;
 }
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }
 
