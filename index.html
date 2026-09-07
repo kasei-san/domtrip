@@ -48,6 +48,31 @@
   .t-new{background:#e3f2fd;color:#1565c0}
   .t-miss{background:#ffebee;color:#c62828}
   .t-done{background:#e8f5e9;color:#2e7d32}
+
+  /* ---- PC（広い画面）レイアウト ---- */
+  /* SP幅(640px)固定だと問題文の折り返しが多く読みにくいため、広い画面では本文幅を広げる */
+  @media (min-width:820px){
+    .wrap{max-width:980px;padding:24px 24px 56px}
+    h1{font-size:1.5rem}
+    body{font-size:1.02rem}
+    .card{padding:20px 24px;margin:16px 0}
+    /* 出題本文は読みやすい行長(全角45字前後)で止める。画面いっぱいには広げない */
+    .stem{max-width:44em;font-size:1.06rem;line-height:1.9}
+    .ch{padding:14px 16px;line-height:1.8}
+    .expl{font-size:.97rem;padding:16px 20px;max-width:52em}
+    /* ホームの統計・科目別・出題範囲・データを2カラムに並べる */
+    .home-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 20px;align-items:start}
+    .home-grid .span2{grid-column:1 / -1}
+    /* 入力・ボタンが画面いっぱいに伸びきらないようにする */
+    .btn-row{max-width:520px}
+    .top-row{max-width:320px}
+    .seg button{flex:0 1 auto;min-width:96px}
+    /* 「学習開始」も押しやすい幅で止める */
+    .start-btn{width:auto !important;min-width:280px;padding:14px 32px}
+  }
+  @media (min-width:1200px){
+    .wrap{max-width:1120px}
+  }
 </style>
 </head>
 <body>
@@ -55,7 +80,7 @@
   <h1>🫛 国内旅行業務取扱管理者試験 過去問アプリ</h1>
   <div style="font-size:.62rem;color:#90a4ae;margin:-2px 0 4px">ver. 2026-09-07 (v6)</div>
   <div class="muted" id="sub">読み込み中…</div>
-  <div class="row" style="margin:8px 0">
+  <div class="row top-row" style="margin:8px 0">
     <a href="dashboard.html" style="text-decoration:none;flex:1"><button style="width:100%">📊 ダッシュボードを見る</button></a>
   </div>
   <div id="warn"></div>
@@ -225,7 +250,7 @@ function home(){
   const t=totals(); const s=statsBySubject();
   const rate = t.answered? Math.round(t.correct/t.answered*100):0;
   const reach = Math.round(t.distinct/t.total*100);
-  let h = `<div class="card">
+  let h = `<div class="home-grid"><div class="card">
     <div class="row" style="justify-content:space-between"><div><div class="big">${reach}%</div><div class="muted">到達度（正解した札 ${t.distinct}/${t.total}）</div></div>
     <div style="text-align:right"><div class="big">${rate}%</div><div class="muted">正答率（延べ）</div></div></div>
     <div class="row" style="margin-top:8px"><span class="pill">🔥 ${STATE.streak||0}日連続</span><span class="pill">本日の復習 ${dueCount(FILTER)}</span><span class="pill">延べ ${t.answered}問</span></div>
@@ -239,7 +264,7 @@ function home(){
   // タグ別件数はタグ選択を外した集合から数える（選択状態で母数が動かないようにする）。
   // 609枚を走査するので、ボタン3個ぶんで3回回さないよう1回だけ計算して使い回す
   const tc = tagCounts(filterCards({...FILTER,tags:[]}));
-  h += `<div class="card"><b>出題範囲</b>
+  h += `<div class="card span2"><b>出題範囲</b>
     <div style="margin:8px 0"><div class="muted">モード</div><div class="seg" id="segMode">
       ${seg("mode","mcq","4択")}${seg("mode","review","解答リビュー")}${seg("mode","flash","暗記カード")}${seg("mode","weak","苦手復習")}</div></div>
     <div style="margin:8px 0"><div class="muted">タグ（複数選択可 / 未選択は全部）</div><div class="seg" id="segTag">
@@ -249,12 +274,12 @@ function home(){
     <div style="margin:8px 0"><div class="muted">年度（複数選択可）</div><div class="seg" id="segYear">
       ${multiSeg("year",YEARS)}</div></div>
     <div class="muted" id="poolInfo" style="margin-top:8px"></div>
-    <button class="primary" style="width:100%;margin-top:10px" onclick="start()">学習開始 ▶</button>
+    <button class="primary start-btn" style="width:100%;margin-top:10px" onclick="start()">学習開始 ▶</button>
   </div>`;
-  h += `<div class="card"><b>データ</b><div class="muted">進捗の正本はこのJSON。端末移行・バックアップに使うのだ。</div>
-    <div class="row" style="margin-top:8px"><button onclick="exportFile()">⬇ JSONで保存</button><button onclick="exportCopy()">📋 コピー</button>
+  h += `<div class="card span2"><b>データ</b><div class="muted">進捗の正本はこのJSON。端末移行・バックアップに使うのだ。</div>
+    <div class="row btn-row" style="margin-top:8px"><button onclick="exportFile()">⬇ JSONで保存</button><button onclick="exportCopy()">📋 コピー</button>
     <button onclick="showImport()">⬆ 復元（読込/貼付）</button></div>
-    <div id="importBox"></div></div>`;
+    <div id="importBox"></div></div></div>`;
   $("screen").innerHTML=h;
   $("segSub").querySelectorAll("button").forEach(b=>b.onclick=()=>{
     if(b.dataset.v==="__all") FILTER.subject=SUBJECTS.slice(); else toggleSel("subject",b.dataset.v,SUBJECTS); home();});
@@ -292,7 +317,7 @@ function showQuestion(){
     <div class="row" style="justify-content:space-between;align-items:center"><div class="row" style="gap:6px;align-items:center"><span class="pill">${c.subject}・${c.year} ${c.qno}</span>${tagPill(c)}</div><span class="muted">${qIdx+1}/${QUEUE.length}</span></div>
     <div style="margin:6px 0;font-size:.78rem;color:#90a4ae">論点: ${esc(c.topic)}</div>
     ${c.flagged?'<div class="flag">⚠️ この設問は公式解答の読取に注意（要確認）</div>':''}
-    <div style="margin:10px 0;line-height:1.7">${esc(c.stem)||"（本文は過去問PDF参照）"}</div>`;
+    <div class="stem" style="margin:10px 0;line-height:1.7">${esc(c.stem)||"（本文は過去問PDF参照）"}</div>`;
   if(c.type==="mcq"){
     h+=`<div class="choices" id="choices">`+c.choices.map(ch=>
       `<button class="ch" data-k="${ch.k}" onclick="pick('${ch.k}',${isMulti})"><span class="k">${ch.k}</span><span>${esc(ch.text)}</span></button>`).join("")+`</div>`;
