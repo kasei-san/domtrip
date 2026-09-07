@@ -44,12 +44,16 @@
   .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#263238;color:#fff;padding:10px 16px;border-radius:999px;font-size:.85rem;opacity:0;transition:.3s;pointer-events:none}
   .toast.show{opacity:1}
   .flag{color:#e65100;font-size:.75rem}
+  .tag{font-size:.7rem;padding:3px 9px;border-radius:999px;font-weight:700;white-space:nowrap}
+  .t-new{background:#e3f2fd;color:#1565c0}
+  .t-miss{background:#ffebee;color:#c62828}
+  .t-done{background:#e8f5e9;color:#2e7d32}
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>🫛 国内旅行業務取扱管理者試験 過去問アプリ</h1>
-  <div style="font-size:.62rem;color:#90a4ae;margin:-2px 0 4px">ver. 2026-06-18 (v3)</div>
+  <div style="font-size:.62rem;color:#90a4ae;margin:-2px 0 4px">ver. 2026-09-07 (v4)</div>
   <div class="muted" id="sub">読み込み中…</div>
   <div class="row" style="margin:8px 0">
     <a href="dashboard.html" style="text-decoration:none;flex:1"><button style="width:100%">📊 ダッシュボードを見る</button></a>
@@ -85,6 +89,33 @@ function saveState(){
 function diagnose(){
   try{ localStorage.setItem("_t","1"); localStorage.removeItem("_t"); }
   catch(e){ sessionMode=true; }
+}
+
+// ---------- 出題タグ ----------
+// new  : 初見（まだ一度も解いていない札）
+// miss : 苦手（過去に間違えて、解き直しでまだ正解できていない札）
+// done : 正解済み（一度は正解できた札。過去にミスがあっても解き直しで正解すれば done）
+// 判定に box を使う理由: grade() は不正解で box=1 に戻すため、seen>0 かつ box===1 は
+// 「直近の解答が不正解」＝解き直し未達を意味する（wrong>0 だけでは克服済みと区別できない）。
+const TAGS = {
+  new:  { label:"🆕 初見",    cls:"t-new"  },
+  miss: { label:"❗ 苦手",     cls:"t-miss" },
+  done: { label:"✅ 正解済み", cls:"t-done" },
+};
+const TAG_ORDER = ["new","miss","done"];
+function cardTag(card){
+  const st = STATE.cards[card.id];
+  if(!st || !st.seen) return "new";
+  return (st.box||1) > 1 ? "done" : "miss";
+}
+function tagPill(card){
+  const t = TAGS[cardTag(card)];
+  return `<span class="tag ${t.cls}">${t.label}</span>`;
+}
+function tagCounts(list){
+  const c={new:0,miss:0,done:0};
+  list.forEach(x=>c[cardTag(x)]++);
+  return c;
 }
 
 // ---------- 統計 ----------
@@ -205,7 +236,12 @@ function home(){
   updatePool();
 }
 function seg(group,val,label){ return `<button data-v="${val}" class="${FILTER[group]===val?"on":""}">${label}</button>`; }
-function updatePool(){ const n=filterCards(FILTER).length; const el=$("poolInfo"); if(el) el.textContent=`対象 ${n}問（うち本日の復習 ${dueCount(FILTER)}問）`; }
+function updatePool(){
+  const list=filterCards(FILTER); const el=$("poolInfo"); if(!el) return;
+  const c=tagCounts(list);
+  el.innerHTML=`対象 ${list.length}問（うち本日の復習 ${dueCount(FILTER)}問）`
+    +`<div class="row" style="gap:6px;margin-top:6px">${TAG_ORDER.map(k=>`<span class="tag ${TAGS[k].cls}">${TAGS[k].label} ${c[k]}</span>`).join("")}</div>`;
+}
 
 function start(){ buildQueue(); if(QUEUE.length===0){ toast("対象の問題がないのだ"); return;} showQuestion(); }
 function showQuestion(){
@@ -213,7 +249,7 @@ function showQuestion(){
   const c=QUEUE[qIdx];
   const isMulti = c.answer.length>1;
   let h=`<div class="card">
-    <div class="row" style="justify-content:space-between"><span class="pill">${c.subject}・${c.year} ${c.qno}</span><span class="muted">${qIdx+1}/${QUEUE.length}</span></div>
+    <div class="row" style="justify-content:space-between;align-items:center"><div class="row" style="gap:6px;align-items:center"><span class="pill">${c.subject}・${c.year} ${c.qno}</span>${tagPill(c)}</div><span class="muted">${qIdx+1}/${QUEUE.length}</span></div>
     <div style="margin:6px 0;font-size:.78rem;color:#90a4ae">論点: ${esc(c.topic)}</div>
     ${c.flagged?'<div class="flag">⚠️ この設問は公式解答の読取に注意（要確認）</div>':''}
     <div style="margin:10px 0;line-height:1.7">${esc(c.stem)||"（本文は過去問PDF参照）"}</div>`;
