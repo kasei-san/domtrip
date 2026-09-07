@@ -75,7 +75,6 @@
     .wrap{max-width:1120px}
   }
   button[disabled]{opacity:.4;cursor:default;box-shadow:none}
-  .ch.ans{border-color:var(--ok);background:#e8f5e9}
 </style>
 </head>
 <body>
@@ -370,7 +369,7 @@ function answerMcq(multi){
 }
 function reveal(){
   const c=QUEUE[qIdx];
-  $("result").innerHTML=`<div class="expl"><b>正解: ${c.answer.join("・")||"（PDF参照）"}</b>\n${esc(stripMd(c.explanation))}</div>
+  $("result").innerHTML=`<div class="expl"><b>正解: ${esc(answerText(c))}</b>\n${esc(stripMd(c.explanation))}</div>
     <div class="row" style="margin-top:10px"><button class="primary" style="flex:1" onclick="selfGrade(true)">✓ できた</button>
     <button style="flex:1;background:#ffcdd2" onclick="selfGrade(false)">✗ できなかった</button></div>`;
 }
@@ -383,8 +382,13 @@ function showResult(ok,c){
 function next(){ qIdx++; showQuestion(); }
 function sessionEnd(){
   const r=sessAnswered?Math.round(sessCorrect/sessAnswered*100):0;
-  // 年度通しは合格ラインの目安（各科目60%）と比べられるようにしておく
-  const pass = FILTER.mode==="run" ? `<div class="muted" style="margin-top:6px">合格基準は各科目60%以上なのだ。${r>=60?"この回は目安クリアなのだ🎉":"あと"+(60-r)+"ポイント足りないのだ"}</div>` : "";
+  // 年度通しは合格ラインの目安と比べられるようにする。
+  // ただし科目をまたいで通した場合は足切り判定にならないため、そのことを明記する
+  const oneSubject = FILTER.subject!=="all";
+  const pass = FILTER.mode==="run"
+    ? `<div class="muted" style="margin-top:6px">合格基準は<b>各科目60%以上</b>なのだ。この範囲の正答率は ${r}% ${r>=60?"で目安クリアなのだ🎉":"であと"+(60-r)+"ポイント必要なのだ"}`
+      + `${oneSubject?"":"<br>※全科目をまとめて通したので、科目別の足切り判定にはならないのだ。科目を絞って通すと1科目分の得点になるのだ"}</div>`
+    : "";
   $("screen").innerHTML=`<div class="card" style="text-align:center">
     <div class="big">おつかれさまなのだ🫛</div>
     <div style="margin:10px 0">このセッション ${sessAnswered}問 / 正解 ${sessCorrect}問（${r}%）</div>
@@ -403,9 +407,9 @@ function showBrowse(){
     <div style="margin:10px 0;line-height:1.7">${esc(c.stem)||"（本文は過去問PDF参照）"}</div>`;
   if(c.choices && c.choices.length){
     h+=`<div class="choices">`+c.choices.map(ch=>
-      `<div class="ch ${c.answer.includes(ch.k)?"ans":""}"><span class="k">${ch.k}</span><span>${esc(ch.text)}</span></div>`).join("")+`</div>`;
+      `<div class="ch ${c.answer.includes(ch.k)?"correct":""}"><span class="k">${ch.k}</span><span>${esc(ch.text)}</span></div>`).join("")+`</div>`;
   }
-  h+=`<div class="expl"><b>正解: ${c.answer.join("・")||"（PDF参照）"}</b>\n${esc(stripMd(c.explanation))}</div>`;
+  h+=`<div class="expl"><b>正解: ${esc(answerText(c))}</b>\n${esc(stripMd(c.explanation))}</div>`;
   h+=`<div class="row" style="margin-top:12px">
     <button style="flex:1" onclick="browseMove(-1)" ${qIdx===0?"disabled":""}>◀ 前の問題</button>
     <button class="primary" style="flex:1" onclick="browseMove(1)" ${qIdx>=QUEUE.length-1?"disabled":""}>次の問題 ▶</button></div>`;
@@ -455,6 +459,13 @@ function applyImport(raw){
 // ---------- util ----------
 function esc(s){ return (s==null?"":String(s)).replace(/[&<>]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[m])); }
 function stripMd(s){ return (s||"").replace(/\*\*/g,"").replace(/^\s*-\s/gm,"・").trim(); }
+// 正解ラベル。暗記カードは answer が空で back に答えが入っているため、
+// そのまま answer を出すと「（PDF参照）」という誤った案内になる
+function answerText(c){
+  if(c.answer && c.answer.length) return c.answer.join("・");
+  if(c.type==="flash" && c.back) return c.back;
+  return "（過去問PDF参照）";
+}
 let toastT;
 function toast(m){ const el=$("toast"); el.textContent=m; el.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove("show"),1800); }
 
