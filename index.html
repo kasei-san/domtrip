@@ -44,14 +44,43 @@
   .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#263238;color:#fff;padding:10px 16px;border-radius:999px;font-size:.85rem;opacity:0;transition:.3s;pointer-events:none}
   .toast.show{opacity:1}
   .flag{color:#e65100;font-size:.75rem}
+  .tag{font-size:.7rem;padding:3px 9px;border-radius:999px;font-weight:700;white-space:nowrap}
+  .t-new{background:#e3f2fd;color:#1565c0}
+  .t-miss{background:#ffebee;color:#c62828}
+  .t-done{background:#e8f5e9;color:#2e7d32}
+
+  /* ---- PC（広い画面）レイアウト ---- */
+  /* SP幅(640px)固定だと問題文の折り返しが多く読みにくいため、広い画面では本文幅を広げる */
+  @media (min-width:820px){
+    .wrap{max-width:980px;padding:24px 24px 56px}
+    h1{font-size:1.5rem}
+    body{font-size:1.02rem}
+    .card{padding:20px 24px;margin:16px 0}
+    /* 出題本文は読みやすい行長(全角45字前後)で止める。画面いっぱいには広げない */
+    .stem{max-width:44em;font-size:1.06rem;line-height:1.9}
+    .ch{padding:14px 16px;line-height:1.8}
+    .expl{font-size:.97rem;padding:16px 20px;max-width:52em}
+    /* ホームの統計・科目別・出題範囲・データを2カラムに並べる */
+    .home-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 20px;align-items:start}
+    .home-grid .span2{grid-column:1 / -1}
+    /* 入力・ボタンが画面いっぱいに伸びきらないようにする */
+    .btn-row{max-width:520px}
+    .top-row{max-width:320px}
+    .seg button{flex:0 1 auto;min-width:96px}
+    /* 「学習開始」も押しやすい幅で止める */
+    .start-btn{width:auto !important;min-width:280px;padding:14px 32px}
+  }
+  @media (min-width:1200px){
+    .wrap{max-width:1120px}
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>🫛 国内旅行業務取扱管理者試験 過去問アプリ</h1>
-  <div style="font-size:.62rem;color:#90a4ae;margin:-2px 0 4px">ver. 2026-06-18 (v3)</div>
+  <div style="font-size:.62rem;color:#90a4ae;margin:-2px 0 4px">ver. 2026-09-07 (v7)</div>
   <div class="muted" id="sub">読み込み中…</div>
-  <div class="row" style="margin:8px 0">
+  <div class="row top-row" style="margin:8px 0">
     <a href="dashboard.html" style="text-decoration:none;flex:1"><button style="width:100%">📊 ダッシュボードを見る</button></a>
   </div>
   <div id="warn"></div>
@@ -69,6 +98,14 @@ const INTERVALS = {1:1,2:3,3:7,4:16,5:35};
 const today = ()=> new Date().toISOString().slice(0,10);
 const addDays = (d,n)=>{ const t=new Date(d+"T00:00:00"); t.setDate(t.getDate()+n); return t.toISOString().slice(0,10); };
 const cards = (window.APP_DATA?APP_DATA.cards:[]);
+// 科目・年度の選択肢はデータから導出する（cram-sheet 由来の暗記カードは year="地理" のため、
+// R03〜R07 をハードコードすると一覧に出てこない）
+const SUBJECTS = ["科目1","科目2","科目3"].filter(k=>cards.some(c=>c.subject===k));
+const YEARS = [...new Set(cards.map(c=>c.year))].sort((a,b)=>{
+  const ra=/^R\d+$/.test(a), rb=/^R\d+$/.test(b);
+  if(ra!==rb) return ra?-1:1;        // R年度を先、それ以外（地理）を後ろに
+  return a.localeCompare(b);
+});
 let sessionMode=false;
 
 // ---------- 永続化（file:// 不可環境を考慮）----------
@@ -85,6 +122,33 @@ function saveState(){
 function diagnose(){
   try{ localStorage.setItem("_t","1"); localStorage.removeItem("_t"); }
   catch(e){ sessionMode=true; }
+}
+
+// ---------- 出題タグ ----------
+// new  : 初見（まだ一度も解いていない札）
+// miss : 苦手（過去に間違えて、解き直しでまだ正解できていない札）
+// done : 正解済み（一度は正解できた札。過去にミスがあっても解き直しで正解すれば done）
+// 判定に box を使う理由: grade() は不正解で box=1 に戻すため、seen>0 かつ box===1 は
+// 「直近の解答が不正解」＝解き直し未達を意味する（wrong>0 だけでは克服済みと区別できない）。
+const TAGS = {
+  new:  { label:"🆕 初見",    cls:"t-new"  },
+  miss: { label:"❗ 苦手",     cls:"t-miss" },
+  done: { label:"✅ 正解済み", cls:"t-done" },
+};
+const TAG_ORDER = ["new","miss","done"];
+function cardTag(card){
+  const st = STATE.cards[card.id];
+  if(!st || !st.seen) return "new";
+  return (st.box||1) > 1 ? "done" : "miss";
+}
+function tagPill(card){
+  const t = TAGS[cardTag(card)];
+  return `<span class="tag ${t.cls}">${t.label}</span>`;
+}
+function tagCounts(list){
+  const c={new:0,miss:0,done:0};
+  list.forEach(x=>c[cardTag(x)]++);
+  return c;
 }
 
 // ---------- 統計 ----------
@@ -110,15 +174,29 @@ function dueCount(filter){
 }
 
 // ---------- フィルタ＆セッション ----------
-let FILTER={subject:"all",year:"all",mode:"mcq"};
+// subject / year は複数選択。既定は全選択（＝絞り込みなし）
+let FILTER={subject:SUBJECTS.slice(),year:YEARS.slice(),mode:"mcq",tags:["new","miss","done"]};
+// 全選択（または未選択）のときは絞り込まない扱いにする
+function inSel(sel, master, v){
+  if(!Array.isArray(sel) || sel.length===0 || sel.length>=master.length) return true;
+  return sel.includes(v);
+}
+// 選択トグル。最後の1つを外したら全選択に戻す（対象0問で詰まないようにする）
+function toggleSel(group, v, master){
+  const a=FILTER[group], i=a.indexOf(v);
+  if(i>=0) a.splice(i,1); else a.push(v);
+  if(a.length===0) FILTER[group]=master.slice();
+}
 function filterCards(f){
   return cards.filter(c=>{
-    if(f.subject!=="all" && c.subject!==f.subject) return false;
-    if(f.year!=="all" && c.year!==f.year) return false;
+    if(!inSel(f.subject, SUBJECTS, c.subject)) return false;
+    if(!inSel(f.year, YEARS, c.year)) return false;
     if(f.mode==="mcq" && c.type!=="mcq") return false;
     if(f.mode==="review" && c.type!=="review") return false;
     if(f.mode==="flash" && c.type!=="flash") return false;
     if(f.mode==="weak"){ const st=STATE.cards[c.id]; if(!(st && st.box===1 && st.seen)) return false; }
+    // タグ絞り込み（初見/苦手/正解済み）。1つも選ばれていない場合は絞り込まない扱いにする
+    if(f.tags && f.tags.length && f.tags.length<TAG_ORDER.length && !f.tags.includes(cardTag(c))) return false;
     return true;
   });
 }
@@ -172,7 +250,7 @@ function home(){
   const t=totals(); const s=statsBySubject();
   const rate = t.answered? Math.round(t.correct/t.answered*100):0;
   const reach = Math.round(t.distinct/t.total*100);
-  let h = `<div class="card">
+  let h = `<div class="home-grid"><div class="card">
     <div class="row" style="justify-content:space-between"><div><div class="big">${reach}%</div><div class="muted">到達度（正解した札 ${t.distinct}/${t.total}）</div></div>
     <div style="text-align:right"><div class="big">${rate}%</div><div class="muted">正答率（延べ）</div></div></div>
     <div class="row" style="margin-top:8px"><span class="pill">🔥 ${STATE.streak||0}日連続</span><span class="pill">本日の復習 ${dueCount(FILTER)}</span><span class="pill">延べ ${t.answered}問</span></div>
@@ -183,29 +261,52 @@ function home(){
     h+=`<div style="margin-top:8px"><div class="stat"><span>${k}</span><span>${x.correctDistinct}/${x.total}（${r}%）</span></div><div class="bar"><div class="fill" style="width:${r}%"></div></div></div>`; });
   h += `</div>`;
   // フィルタ
-  const years=["all","R03","R04","R05","R06","R07"];
-  h += `<div class="card"><b>出題範囲</b>
+  // タグ別件数はタグ選択を外した集合から数える（選択状態で母数が動かないようにする）。
+  // 609枚を走査するので、ボタン3個ぶんで3回回さないよう1回だけ計算して使い回す
+  const tc = tagCounts(filterCards({...FILTER,tags:[]}));
+  h += `<div class="card span2"><b>出題範囲</b>
     <div style="margin:8px 0"><div class="muted">モード</div><div class="seg" id="segMode">
       ${seg("mode","mcq","4択")}${seg("mode","review","解答リビュー")}${seg("mode","flash","暗記カード")}${seg("mode","weak","苦手復習")}</div></div>
-    <div class="row"><div style="flex:1"><div class="muted">科目</div><select id="selSub">
-      ${["all","科目1","科目2","科目3"].map(v=>`<option value="${v}" ${FILTER.subject===v?"selected":""}>${v==="all"?"全科目":v}</option>`).join("")}</select></div>
-    <div style="flex:1"><div class="muted">年度</div><select id="selYear">
-      ${years.map(v=>`<option value="${v}" ${FILTER.year===v?"selected":""}>${v==="all"?"全年度":v}</option>`).join("")}</select></div></div>
+    <div style="margin:8px 0"><div class="muted">タグ（複数選択可 / 未選択は全部）</div><div class="seg" id="segTag">
+      ${TAG_ORDER.map(k=>`<button data-v="${k}" class="${FILTER.tags.includes(k)?"on":""}">${TAGS[k].label} ${tc[k]}</button>`).join("")}</div></div>
+    <div style="margin:8px 0"><div class="muted">科目（複数選択可）</div><div class="seg" id="segSub">
+      ${multiSeg("subject",SUBJECTS)}</div></div>
+    <div style="margin:8px 0"><div class="muted">年度（複数選択可）</div><div class="seg" id="segYear">
+      ${multiSeg("year",YEARS)}</div></div>
     <div class="muted" id="poolInfo" style="margin-top:8px"></div>
-    <button class="primary" style="width:100%;margin-top:10px" onclick="start()">学習開始 ▶</button>
+    <button class="primary start-btn" style="width:100%;margin-top:10px" onclick="start()">学習開始 ▶</button>
   </div>`;
-  h += `<div class="card"><b>データ</b><div class="muted">進捗の正本はこのJSON。端末移行・バックアップに使うのだ。</div>
-    <div class="row" style="margin-top:8px"><button onclick="exportFile()">⬇ JSONで保存</button><button onclick="exportCopy()">📋 コピー</button>
+  h += `<div class="card span2"><b>データ</b><div class="muted">進捗の正本はこのJSON。端末移行・バックアップに使うのだ。</div>
+    <div class="row btn-row" style="margin-top:8px"><button onclick="exportFile()">⬇ JSONで保存</button><button onclick="exportCopy()">📋 コピー</button>
     <button onclick="showImport()">⬆ 復元（読込/貼付）</button></div>
-    <div id="importBox"></div></div>`;
+    <div id="importBox"></div></div></div>`;
   $("screen").innerHTML=h;
-  $("selSub").onchange=e=>{FILTER.subject=e.target.value;updatePool();};
-  $("selYear").onchange=e=>{FILTER.year=e.target.value;updatePool();};
+  $("segSub").querySelectorAll("button").forEach(b=>b.onclick=()=>{
+    if(b.dataset.v==="__all") FILTER.subject=SUBJECTS.slice(); else toggleSel("subject",b.dataset.v,SUBJECTS); home();});
+  $("segYear").querySelectorAll("button").forEach(b=>b.onclick=()=>{
+    if(b.dataset.v==="__all") FILTER.year=YEARS.slice(); else toggleSel("year",b.dataset.v,YEARS); home();});
   $("segMode").querySelectorAll("button").forEach(b=>b.onclick=()=>{FILTER.mode=b.dataset.v;home();});
+  $("segTag").querySelectorAll("button").forEach(b=>b.onclick=()=>{toggleTag(b.dataset.v);home();});
   updatePool();
 }
 function seg(group,val,label){ return `<button data-v="${val}" class="${FILTER[group]===val?"on":""}">${label}</button>`; }
-function updatePool(){ const n=filterCards(FILTER).length; const el=$("poolInfo"); if(el) el.textContent=`対象 ${n}問（うち本日の復習 ${dueCount(FILTER)}問）`; }
+// タグの選択トグル。全部外したら「全部選択」と同じ意味になるよう全選択に戻す
+function toggleTag(k){
+  const i=FILTER.tags.indexOf(k);
+  if(i>=0) FILTER.tags.splice(i,1); else FILTER.tags.push(k);
+  if(FILTER.tags.length===0) FILTER.tags=TAG_ORDER.slice();
+}
+// 複数選択のトグル群。末尾に「すべて」を置き、全選択に一発で戻せるようにする
+function multiSeg(group, master){
+  const sel=FILTER[group], all=sel.length>=master.length;
+  return master.map(v=>`<button data-v="${v}" class="${sel.includes(v)?"on":""}">${v}</button>`).join("")
+    + `<button data-v="__all" class="${all?"on":""}">すべて</button>`;
+}
+function updatePool(){
+  // タグ別の件数はタグトグル側に表示しているので、ここは合計だけ出す
+  const list=filterCards(FILTER); const el=$("poolInfo"); if(!el) return;
+  el.textContent=`対象 ${list.length}問（うち本日の復習 ${dueCount(FILTER)}問）`;
+}
 
 function start(){ buildQueue(); if(QUEUE.length===0){ toast("対象の問題がないのだ"); return;} showQuestion(); }
 function showQuestion(){
@@ -213,10 +314,10 @@ function showQuestion(){
   const c=QUEUE[qIdx];
   const isMulti = c.answer.length>1;
   let h=`<div class="card">
-    <div class="row" style="justify-content:space-between"><span class="pill">${c.subject}・${c.year} ${c.qno}</span><span class="muted">${qIdx+1}/${QUEUE.length}</span></div>
+    <div class="row" style="justify-content:space-between;align-items:center"><div class="row" style="gap:6px;align-items:center"><span class="pill">${c.subject}・${c.year} ${c.qno}</span>${tagPill(c)}</div><span class="muted">${qIdx+1}/${QUEUE.length}</span></div>
     <div style="margin:6px 0;font-size:.78rem;color:#90a4ae">論点: ${esc(c.topic)}</div>
     ${c.flagged?'<div class="flag">⚠️ この設問は公式解答の読取に注意（要確認）</div>':''}
-    <div style="margin:10px 0;line-height:1.7">${esc(c.stem)||"（本文は過去問PDF参照）"}</div>`;
+    <div class="stem" style="margin:10px 0;line-height:1.7">${esc(c.stem)||"（本文は過去問PDF参照）"}</div>`;
   if(c.type==="mcq"){
     h+=`<div class="choices" id="choices">`+c.choices.map(ch=>
       `<button class="ch" data-k="${ch.k}" onclick="pick('${ch.k}',${isMulti})"><span class="k">${ch.k}</span><span>${esc(ch.text)}</span></button>`).join("")+`</div>`;
