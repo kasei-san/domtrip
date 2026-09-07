@@ -53,7 +53,7 @@
 <body>
 <div class="wrap">
   <h1>🫛 国内旅行業務取扱管理者試験 過去問アプリ</h1>
-  <div style="font-size:.62rem;color:#90a4ae;margin:-2px 0 4px">ver. 2026-09-07 (v5)</div>
+  <div style="font-size:.62rem;color:#90a4ae;margin:-2px 0 4px">ver. 2026-09-07 (v6)</div>
   <div class="muted" id="sub">読み込み中…</div>
   <div class="row" style="margin:8px 0">
     <a href="dashboard.html" style="text-decoration:none;flex:1"><button style="width:100%">📊 ダッシュボードを見る</button></a>
@@ -73,6 +73,14 @@ const INTERVALS = {1:1,2:3,3:7,4:16,5:35};
 const today = ()=> new Date().toISOString().slice(0,10);
 const addDays = (d,n)=>{ const t=new Date(d+"T00:00:00"); t.setDate(t.getDate()+n); return t.toISOString().slice(0,10); };
 const cards = (window.APP_DATA?APP_DATA.cards:[]);
+// 科目・年度の選択肢はデータから導出する（cram-sheet 由来の暗記カードは year="地理" のため、
+// R03〜R07 をハードコードすると一覧に出てこない）
+const SUBJECTS = ["科目1","科目2","科目3"].filter(k=>cards.some(c=>c.subject===k));
+const YEARS = [...new Set(cards.map(c=>c.year))].sort((a,b)=>{
+  const ra=/^R\d+$/.test(a), rb=/^R\d+$/.test(b);
+  if(ra!==rb) return ra?-1:1;        // R年度を先、それ以外（地理）を後ろに
+  return a.localeCompare(b);
+});
 let sessionMode=false;
 
 // ---------- 永続化（file:// 不可環境を考慮）----------
@@ -141,11 +149,23 @@ function dueCount(filter){
 }
 
 // ---------- フィルタ＆セッション ----------
-let FILTER={subject:"all",year:"all",mode:"mcq",tags:["new","miss","done"]};
+// subject / year は複数選択。既定は全選択（＝絞り込みなし）
+let FILTER={subject:SUBJECTS.slice(),year:YEARS.slice(),mode:"mcq",tags:["new","miss","done"]};
+// 全選択（または未選択）のときは絞り込まない扱いにする
+function inSel(sel, master, v){
+  if(!Array.isArray(sel) || sel.length===0 || sel.length>=master.length) return true;
+  return sel.includes(v);
+}
+// 選択トグル。最後の1つを外したら全選択に戻す（対象0問で詰まないようにする）
+function toggleSel(group, v, master){
+  const a=FILTER[group], i=a.indexOf(v);
+  if(i>=0) a.splice(i,1); else a.push(v);
+  if(a.length===0) FILTER[group]=master.slice();
+}
 function filterCards(f){
   return cards.filter(c=>{
-    if(f.subject!=="all" && c.subject!==f.subject) return false;
-    if(f.year!=="all" && c.year!==f.year) return false;
+    if(!inSel(f.subject, SUBJECTS, c.subject)) return false;
+    if(!inSel(f.year, YEARS, c.year)) return false;
     if(f.mode==="mcq" && c.type!=="mcq") return false;
     if(f.mode==="review" && c.type!=="review") return false;
     if(f.mode==="flash" && c.type!=="flash") return false;
@@ -219,16 +239,15 @@ function home(){
   // タグ別件数はタグ選択を外した集合から数える（選択状態で母数が動かないようにする）。
   // 609枚を走査するので、ボタン3個ぶんで3回回さないよう1回だけ計算して使い回す
   const tc = tagCounts(filterCards({...FILTER,tags:[]}));
-  const years=["all","R03","R04","R05","R06","R07"];
   h += `<div class="card"><b>出題範囲</b>
     <div style="margin:8px 0"><div class="muted">モード</div><div class="seg" id="segMode">
       ${seg("mode","mcq","4択")}${seg("mode","review","解答リビュー")}${seg("mode","flash","暗記カード")}${seg("mode","weak","苦手復習")}</div></div>
     <div style="margin:8px 0"><div class="muted">タグ（複数選択可 / 未選択は全部）</div><div class="seg" id="segTag">
       ${TAG_ORDER.map(k=>`<button data-v="${k}" class="${FILTER.tags.includes(k)?"on":""}">${TAGS[k].label} ${tc[k]}</button>`).join("")}</div></div>
-    <div class="row"><div style="flex:1"><div class="muted">科目</div><select id="selSub">
-      ${["all","科目1","科目2","科目3"].map(v=>`<option value="${v}" ${FILTER.subject===v?"selected":""}>${v==="all"?"全科目":v}</option>`).join("")}</select></div>
-    <div style="flex:1"><div class="muted">年度</div><select id="selYear">
-      ${years.map(v=>`<option value="${v}" ${FILTER.year===v?"selected":""}>${v==="all"?"全年度":v}</option>`).join("")}</select></div></div>
+    <div style="margin:8px 0"><div class="muted">科目（複数選択可）</div><div class="seg" id="segSub">
+      ${multiSeg("subject",SUBJECTS)}</div></div>
+    <div style="margin:8px 0"><div class="muted">年度（複数選択可）</div><div class="seg" id="segYear">
+      ${multiSeg("year",YEARS)}</div></div>
     <div class="muted" id="poolInfo" style="margin-top:8px"></div>
     <button class="primary" style="width:100%;margin-top:10px" onclick="start()">学習開始 ▶</button>
   </div>`;
@@ -237,8 +256,10 @@ function home(){
     <button onclick="showImport()">⬆ 復元（読込/貼付）</button></div>
     <div id="importBox"></div></div>`;
   $("screen").innerHTML=h;
-  $("selSub").onchange=e=>{FILTER.subject=e.target.value;updatePool();};
-  $("selYear").onchange=e=>{FILTER.year=e.target.value;updatePool();};
+  $("segSub").querySelectorAll("button").forEach(b=>b.onclick=()=>{
+    if(b.dataset.v==="__all") FILTER.subject=SUBJECTS.slice(); else toggleSel("subject",b.dataset.v,SUBJECTS); home();});
+  $("segYear").querySelectorAll("button").forEach(b=>b.onclick=()=>{
+    if(b.dataset.v==="__all") FILTER.year=YEARS.slice(); else toggleSel("year",b.dataset.v,YEARS); home();});
   $("segMode").querySelectorAll("button").forEach(b=>b.onclick=()=>{FILTER.mode=b.dataset.v;home();});
   $("segTag").querySelectorAll("button").forEach(b=>b.onclick=()=>{toggleTag(b.dataset.v);home();});
   updatePool();
@@ -249,6 +270,12 @@ function toggleTag(k){
   const i=FILTER.tags.indexOf(k);
   if(i>=0) FILTER.tags.splice(i,1); else FILTER.tags.push(k);
   if(FILTER.tags.length===0) FILTER.tags=TAG_ORDER.slice();
+}
+// 複数選択のトグル群。末尾に「すべて」を置き、全選択に一発で戻せるようにする
+function multiSeg(group, master){
+  const sel=FILTER[group], all=sel.length>=master.length;
+  return master.map(v=>`<button data-v="${v}" class="${sel.includes(v)?"on":""}">${v}</button>`).join("")
+    + `<button data-v="__all" class="${all?"on":""}">すべて</button>`;
 }
 function updatePool(){
   // タグ別の件数はタグトグル側に表示しているので、ここは合計だけ出す
