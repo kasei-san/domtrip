@@ -80,7 +80,7 @@
 <body>
 <div class="wrap">
   <h1>🫛 国内旅行業務取扱管理者試験 過去問アプリ</h1>
-  <div style="font-size:.62rem;color:#90a4ae;margin:-2px 0 4px">ver. 2026-09-07 (v9)</div>
+  <div style="font-size:.62rem;color:#90a4ae;margin:-2px 0 4px">ver. 2026-09-07 (v10)</div>
   <div class="muted" id="sub">読み込み中…</div>
   <div class="row top-row" style="margin:8px 0">
     <a href="dashboard.html" style="text-decoration:none;flex:1"><button style="width:100%">📊 ダッシュボードを見る</button></a>
@@ -183,9 +183,13 @@ function inSel(sel, master, v){
   if(!Array.isArray(sel) || sel.length===0 || sel.length>=master.length) return true;
   return sel.includes(v);
 }
-// 選択トグル。最後の1つを外したら全選択に戻す（対象0問で詰まないようにする）
+// 選択トグル。
+// - 全選択中に1つタップ → それだけを選ぶ（「科目1だけ」を1タップで作れるようにする。他を全部外す手間をなくす）
+// - それ以外はON/OFFを反転し、最後の1つを外したら全選択に戻す（対象0問で詰まないようにする）
 function toggleSel(group, v, master){
-  const a=FILTER[group], i=a.indexOf(v);
+  const a=FILTER[group];
+  if(a.length>=master.length){ FILTER[group]=[v]; return; }
+  const i=a.indexOf(v);
   if(i>=0) a.splice(i,1); else a.push(v);
   if(a.length===0) FILTER[group]=master.slice();
 }
