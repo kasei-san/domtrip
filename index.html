@@ -80,7 +80,7 @@
 <body>
 <div class="wrap">
   <h1>🫛 国内旅行業務取扱管理者試験 過去問アプリ</h1>
-  <div style="font-size:.62rem;color:#90a4ae;margin:-2px 0 4px">ver. 2026-09-07 (v10)</div>
+  <div style="font-size:.62rem;color:#90a4ae;margin:-2px 0 4px">ver. 2026-09-07 (v11)</div>
   <div class="muted" id="sub">読み込み中…</div>
   <div class="row top-row" style="margin:8px 0">
     <a href="dashboard.html" style="text-decoration:none;flex:1"><button style="width:100%">📊 ダッシュボードを見る</button></a>
@@ -386,12 +386,16 @@ function showResult(ok,c){
 function next(){ qIdx++; showQuestion(); }
 function sessionEnd(){
   const r=sessAnswered?Math.round(sessCorrect/sessAnswered*100):0;
-  // 年度通しは合格ラインの目安と比べられるようにする。
-  // ただし科目をまたいで通した場合は足切り判定にならないため、そのことを明記する
+  // 年度通しは合格ラインの目安と比べられるようにする。ただし表示する正答率は「問題数ベース」で、
+  // 本番の得点率とは一致しない場合があるため、そのことを明記する:
+  // - 科目3は4点×12問＋2点×26問の混在配点で、問題数の正答率＝得点率ではない（カード側に配点データが無いので算出できない）
+  // - 科目をまたいで通した場合は科目別の足切り判定にならない
   const oneSubject = FILTER.subject.length===1;   // 科目は複数選択（配列）。1科目に絞った時だけ足切り判定として読める
+  const hasSubject3 = QUEUE.some(c=>c.subject==="科目3");
   const pass = FILTER.mode==="run"
-    ? `<div class="muted" style="margin-top:6px">合格基準は<b>各科目60%以上</b>なのだ。この範囲の正答率は ${r}% ${r>=60?"で目安クリアなのだ🎉":"であと"+(60-r)+"ポイント必要なのだ"}`
-      + `${oneSubject?"":"<br>※全科目をまとめて通したので、科目別の足切り判定にはならないのだ。科目を絞って通すと1科目分の得点になるのだ"}</div>`
+    ? `<div class="muted" style="margin-top:6px">合格基準は<b>各科目60%以上</b>なのだ。この範囲の正答率（問題数ベース）は ${r}% ${r>=60?"で目安クリアなのだ🎉":"であと"+(60-r)+"ポイント必要なのだ"}`
+      + `${oneSubject?"":"<br>※全科目をまとめて通したので、科目別の足切り判定にはならないのだ。科目を絞って通すと1科目分の得点になるのだ"}`
+      + `${hasSubject3?"<br>※科目3は4点問題と2点問題が混在するので、問題数ベースの正答率は本番の得点率と一致しないのだ。目安として見てほしいのだ":""}</div>`
     : "";
   $("screen").innerHTML=`<div class="card" style="text-align:center">
     <div class="big">おつかれさまなのだ🫛</div>
