@@ -36,7 +36,7 @@
   .fill{height:100%;background:var(--z);border-radius:999px}
   select,textarea{font:inherit;border:1px solid #cfd8dc;border-radius:8px;padding:8px;width:100%;background:#fff}
   .seg{display:flex;gap:6px;flex-wrap:wrap}
-  .seg button{flex:1;min-width:70px;padding:9px;font-size:.85rem}
+  .seg button{flex:1;min-width:70px;padding:9px;font-size:.85rem;white-space:nowrap}
   .seg button.on{background:var(--z);color:#fff}
   .big{font-size:1.6rem;font-weight:800;color:var(--zd)}
   .hidden{display:none}
@@ -74,6 +74,8 @@
   @media (min-width:1200px){
     .wrap{max-width:1120px}
   }
+  button[disabled]{opacity:.4;cursor:default;box-shadow:none}
+  .ch.ans{border-color:var(--ok);background:#e8f5e9}
 </style>
 </head>
 <body>
@@ -202,8 +204,14 @@ function filterCards(f){
   });
 }
 let QUEUE=[], qIdx=0, sessAnswered=0, sessCorrect=0;
+// run=年度通し（採点あり・上限なし） / browse=参照（採点せず答えを見るだけ）
+function isRunMode(){ return FILTER.mode==="run" || FILTER.mode==="browse"; }
 function buildQueue(){
   const t=today(); const pool=filterCards(FILTER);
+  if(isRunMode()){
+    // 年度通し・参照はSRSのdue順やシャッフルを使わず、問題番号順（app_data.js の並び順）で全件出す
+    QUEUE = pool.slice(); qIdx=0; sessAnswered=0; sessCorrect=0; return;
+  }
   const due=[], fresh=[];
   pool.forEach(c=>{ const st=STATE.cards[c.id];
     if(st){ if(st.due && st.due<=t) due.push(c); }
@@ -267,7 +275,8 @@ function home(){
   const tc = tagCounts(filterCards({...FILTER,tags:[]}));
   h += `<div class="card span2"><b>出題範囲</b>
     <div style="margin:8px 0"><div class="muted">モード</div><div class="seg" id="segMode">
-      ${seg("mode","mcq","4択")}${seg("mode","review","解答リビュー")}${seg("mode","flash","暗記カード")}${seg("mode","weak","苦手復習")}</div></div>
+      ${seg("mode","mcq","4択")}${seg("mode","review","解答リビュー")}${seg("mode","flash","暗記カード")}${seg("mode","weak","苦手復習")}
+      ${seg("mode","run","📝 年度通し")}${seg("mode","browse","👀 参照")}</div></div>
     <div style="margin:8px 0"><div class="muted">タグ（複数選択可 / 未選択は全部）</div><div class="seg" id="segTag">
       ${TAG_ORDER.map(k=>`<button data-v="${k}" class="${FILTER.tags.includes(k)?"on":""}">${TAGS[k].label} ${tc[k]}</button>`).join("")}</div></div>
     <div style="margin:8px 0"><div class="muted">科目（複数選択可）</div><div class="seg" id="segSub">
@@ -304,12 +313,20 @@ function multiSeg(group, master){
     + `<button data-v="__all" class="${all?"on":""}">すべて</button>`;
 }
 function updatePool(){
-  // タグ別の件数はタグトグル側に表示しているので、ここは合計だけ出す
-  const list=filterCards(FILTER); const el=$("poolInfo"); if(!el) return;
-  el.textContent=`対象 ${list.length}問（うち本日の復習 ${dueCount(FILTER)}問）`;
+  const n=filterCards(FILTER).length; const el=$("poolInfo"); if(!el) return;
+  if(isRunMode()){
+    el.innerHTML=`対象 ${n}問を問題番号順に${FILTER.mode==="run"?"通しで出題":"参照"}（1セッション${SESSION_LIMIT}問の上限なし）`
+      + `<div class="muted" style="margin-top:4px">${FILTER.mode==="run"
+          ? "科目・年度を1つに絞ると、その回を本番と同じ順で通せるのだ。採点・進捗は通常どおり記録するのだ。"
+          : "答えと解説を見るだけなのだ。採点も進捗の更新もしないのだ。"}</div>`;
+  } else {
+    el.textContent=`対象 ${n}問（うち本日の復習 ${dueCount(FILTER)}問）`;
+  }
 }
 
-function start(){ buildQueue(); if(QUEUE.length===0){ toast("対象の問題がないのだ"); return;} showQuestion(); }
+function start(){ buildQueue(); if(QUEUE.length===0){ toast("対象の問題がないのだ"); return;}
+  if(FILTER.mode==="browse") return showBrowse();
+  showQuestion(); }
 function showQuestion(){
   if(qIdx>=QUEUE.length){ return sessionEnd(); }
   const c=QUEUE[qIdx];
@@ -366,11 +383,38 @@ function showResult(ok,c){
 function next(){ qIdx++; showQuestion(); }
 function sessionEnd(){
   const r=sessAnswered?Math.round(sessCorrect/sessAnswered*100):0;
+  // 年度通しは合格ラインの目安（各科目60%）と比べられるようにしておく
+  const pass = FILTER.mode==="run" ? `<div class="muted" style="margin-top:6px">合格基準は各科目60%以上なのだ。${r>=60?"この回は目安クリアなのだ🎉":"あと"+(60-r)+"ポイント足りないのだ"}</div>` : "";
   $("screen").innerHTML=`<div class="card" style="text-align:center">
     <div class="big">おつかれさまなのだ🫛</div>
     <div style="margin:10px 0">このセッション ${sessAnswered}問 / 正解 ${sessCorrect}問（${r}%）</div>
-    <button class="primary" style="width:100%" onclick="start()">もう一周</button>
+    ${pass}
+    <button class="primary" style="width:100%;margin-top:8px" onclick="start()">もう一周</button>
     <button style="width:100%;margin-top:8px" onclick="home()">ホームへ</button></div>`;
+}
+
+// ---------- 参照モード（採点せず答えを見る） ----------
+function showBrowse(){
+  const c=QUEUE[qIdx];
+  let h=`<div class="card">
+    <div class="row" style="justify-content:space-between"><span class="pill">${c.subject}・${c.year} ${c.qno}</span><span class="muted">${qIdx+1}/${QUEUE.length}</span></div>
+    <div style="margin:6px 0;font-size:.78rem;color:#90a4ae">論点: ${esc(c.topic)}</div>
+    ${c.flagged?'<div class="flag">⚠️ この設問は公式解答の読取に注意（要確認）</div>':''}
+    <div style="margin:10px 0;line-height:1.7">${esc(c.stem)||"（本文は過去問PDF参照）"}</div>`;
+  if(c.choices && c.choices.length){
+    h+=`<div class="choices">`+c.choices.map(ch=>
+      `<div class="ch ${c.answer.includes(ch.k)?"ans":""}"><span class="k">${ch.k}</span><span>${esc(ch.text)}</span></div>`).join("")+`</div>`;
+  }
+  h+=`<div class="expl"><b>正解: ${c.answer.join("・")||"（PDF参照）"}</b>\n${esc(stripMd(c.explanation))}</div>`;
+  h+=`<div class="row" style="margin-top:12px">
+    <button style="flex:1" onclick="browseMove(-1)" ${qIdx===0?"disabled":""}>◀ 前の問題</button>
+    <button class="primary" style="flex:1" onclick="browseMove(1)" ${qIdx>=QUEUE.length-1?"disabled":""}>次の問題 ▶</button></div>`;
+  h+=`</div><button onclick="home()">← ホーム</button>`;
+  $("screen").innerHTML=h;
+}
+function browseMove(d){
+  qIdx=Math.min(Math.max(qIdx+d,0),QUEUE.length-1);
+  showBrowse(); window.scrollTo(0,0);
 }
 
 // ---------- エクスポート/インポート ----------
