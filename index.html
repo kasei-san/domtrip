@@ -53,7 +53,7 @@
 <body>
 <div class="wrap">
   <h1>🫛 国内旅行業務取扱管理者試験 過去問アプリ</h1>
-  <div style="font-size:.62rem;color:#90a4ae;margin:-2px 0 4px">ver. 2026-09-07 (v4)</div>
+  <div style="font-size:.62rem;color:#90a4ae;margin:-2px 0 4px">ver. 2026-09-07 (v5)</div>
   <div class="muted" id="sub">読み込み中…</div>
   <div class="row" style="margin:8px 0">
     <a href="dashboard.html" style="text-decoration:none;flex:1"><button style="width:100%">📊 ダッシュボードを見る</button></a>
@@ -141,7 +141,7 @@ function dueCount(filter){
 }
 
 // ---------- フィルタ＆セッション ----------
-let FILTER={subject:"all",year:"all",mode:"mcq"};
+let FILTER={subject:"all",year:"all",mode:"mcq",tags:["new","miss","done"]};
 function filterCards(f){
   return cards.filter(c=>{
     if(f.subject!=="all" && c.subject!==f.subject) return false;
@@ -150,6 +150,8 @@ function filterCards(f){
     if(f.mode==="review" && c.type!=="review") return false;
     if(f.mode==="flash" && c.type!=="flash") return false;
     if(f.mode==="weak"){ const st=STATE.cards[c.id]; if(!(st && st.box===1 && st.seen)) return false; }
+    // タグ絞り込み（初見/苦手/正解済み）。1つも選ばれていない場合は絞り込まない扱いにする
+    if(f.tags && f.tags.length && f.tags.length<TAG_ORDER.length && !f.tags.includes(cardTag(c))) return false;
     return true;
   });
 }
@@ -214,10 +216,15 @@ function home(){
     h+=`<div style="margin-top:8px"><div class="stat"><span>${k}</span><span>${x.correctDistinct}/${x.total}（${r}%）</span></div><div class="bar"><div class="fill" style="width:${r}%"></div></div></div>`; });
   h += `</div>`;
   // フィルタ
+  // タグ別件数はタグ選択を外した集合から数える（選択状態で母数が動かないようにする）。
+  // 609枚を走査するので、ボタン3個ぶんで3回回さないよう1回だけ計算して使い回す
+  const tc = tagCounts(filterCards({...FILTER,tags:[]}));
   const years=["all","R03","R04","R05","R06","R07"];
   h += `<div class="card"><b>出題範囲</b>
     <div style="margin:8px 0"><div class="muted">モード</div><div class="seg" id="segMode">
       ${seg("mode","mcq","4択")}${seg("mode","review","解答リビュー")}${seg("mode","flash","暗記カード")}${seg("mode","weak","苦手復習")}</div></div>
+    <div style="margin:8px 0"><div class="muted">タグ（複数選択可 / 未選択は全部）</div><div class="seg" id="segTag">
+      ${TAG_ORDER.map(k=>`<button data-v="${k}" class="${FILTER.tags.includes(k)?"on":""}">${TAGS[k].label} ${tc[k]}</button>`).join("")}</div></div>
     <div class="row"><div style="flex:1"><div class="muted">科目</div><select id="selSub">
       ${["all","科目1","科目2","科目3"].map(v=>`<option value="${v}" ${FILTER.subject===v?"selected":""}>${v==="all"?"全科目":v}</option>`).join("")}</select></div>
     <div style="flex:1"><div class="muted">年度</div><select id="selYear">
@@ -233,14 +240,20 @@ function home(){
   $("selSub").onchange=e=>{FILTER.subject=e.target.value;updatePool();};
   $("selYear").onchange=e=>{FILTER.year=e.target.value;updatePool();};
   $("segMode").querySelectorAll("button").forEach(b=>b.onclick=()=>{FILTER.mode=b.dataset.v;home();});
+  $("segTag").querySelectorAll("button").forEach(b=>b.onclick=()=>{toggleTag(b.dataset.v);home();});
   updatePool();
 }
 function seg(group,val,label){ return `<button data-v="${val}" class="${FILTER[group]===val?"on":""}">${label}</button>`; }
+// タグの選択トグル。全部外したら「全部選択」と同じ意味になるよう全選択に戻す
+function toggleTag(k){
+  const i=FILTER.tags.indexOf(k);
+  if(i>=0) FILTER.tags.splice(i,1); else FILTER.tags.push(k);
+  if(FILTER.tags.length===0) FILTER.tags=TAG_ORDER.slice();
+}
 function updatePool(){
+  // タグ別の件数はタグトグル側に表示しているので、ここは合計だけ出す
   const list=filterCards(FILTER); const el=$("poolInfo"); if(!el) return;
-  const c=tagCounts(list);
-  el.innerHTML=`対象 ${list.length}問（うち本日の復習 ${dueCount(FILTER)}問）`
-    +`<div class="row" style="gap:6px;margin-top:6px">${TAG_ORDER.map(k=>`<span class="tag ${TAGS[k].cls}">${TAGS[k].label} ${c[k]}</span>`).join("")}</div>`;
+  el.textContent=`対象 ${list.length}問（うち本日の復習 ${dueCount(FILTER)}問）`;
 }
 
 function start(){ buildQueue(); if(QUEUE.length===0){ toast("対象の問題がないのだ"); return;} showQuestion(); }
