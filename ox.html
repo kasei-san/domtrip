@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>🫛 1行暗記○×</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#43a047">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="1行暗記○×">
+<link rel="apple-touch-icon" href="icon.svg">
+<style>
+  :root{--z:#43a047;--zd:#2e7d32;--bg:#f1f8e9;--ng:#ef5350;--ok:#43a047}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{font-family:-apple-system,"Hiragino Sans","Yu Gothic",sans-serif;margin:0;background:var(--bg);color:#263238;padding:env(safe-area-inset-top) 0 0}
+  .wrap{max-width:640px;margin:0 auto;padding:16px 16px 40px}
+  h1{font-size:1.15rem;margin:0 0 2px;color:var(--zd)}
+  .muted{color:#78909c;font-size:.8rem}
+  .warn{background:#fff3e0;border-left:5px solid #fb8c00;padding:8px 12px;border-radius:8px;font-size:.82rem;margin:10px 0}
+  button{font:inherit;cursor:pointer;border:none;border-radius:10px;padding:12px 14px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+  button.primary{background:var(--z);color:#fff;font-weight:700}
+  button:active{transform:scale(.98)}
+  button[disabled]{opacity:.4;cursor:default;box-shadow:none}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .card{background:#fff;border-radius:14px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,.06);margin:12px 0}
+  .pill{font-size:.7rem;padding:3px 9px;border-radius:999px;background:#e8f5e9;color:var(--zd);font-weight:700}
+  .seg{display:flex;gap:6px;flex-wrap:wrap}
+  .seg button{flex:1;min-width:64px;padding:9px;font-size:.85rem;white-space:nowrap}
+  .seg button.on{background:var(--z);color:#fff}
+  .stat{display:flex;justify-content:space-between;font-size:.9rem;padding:4px 0;border-bottom:1px dashed #e0e0e0}
+  .bar{background:#eceff1;border-radius:999px;height:14px;overflow:hidden;margin:4px 0}
+  .fill{height:100%;background:var(--z);border-radius:999px}
+  .fact{background:#fffde7;border-left:5px solid #fbc02d;border-radius:10px;padding:12px 14px;font-size:1.02rem;line-height:1.8}
+  .fact .lbl{font-size:.7rem;color:#f57f17;font-weight:700;display:block;margin-bottom:2px}
+  .stem{font-size:1.15rem;line-height:1.8;padding:8px 0;font-weight:600}
+  .ox{display:flex;gap:12px;margin:14px 0}
+  .ox button{flex:1;font-size:2rem;font-weight:800;padding:22px 0;border:3px solid transparent}
+  .ox .o{color:var(--zd)} .ox .x{color:#c62828}
+  .ox button.hit{border-color:var(--ok);background:#e8f5e9}
+  .ox button.miss{border-color:var(--ng);background:#ffebee}
+  .judge{font-size:1.4rem;font-weight:800;margin:6px 0}
+  .judge.ok{color:var(--zd)} .judge.ng{color:#c62828}
+  .big{font-size:1.6rem;font-weight:800;color:var(--zd)}
+  .next{width:100%;font-size:1.1rem;padding:16px}
+  a.plain{color:var(--zd)}
+  @media (min-width:820px){
+    .wrap{max-width:820px;padding:24px 24px 56px}
+    .stem{font-size:1.3rem}
+    .fact{font-size:1.08rem}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🫛 1行暗記○×</h1>
+  <div style="font-size:.62rem;color:#90a4ae;margin:-2px 0 4px">ver. 2026-09-08 (v10)</div>
+  <div class="muted">「覚える1行」を読んで、○か×を1回押すだけ。やる気ゼロの日用。 <a class="plain" href="index.html">← 過去問アプリへ</a></div>
+  <div id="warn"></div>
+  <div id="screen"></div>
+</div>
+
+<script src="ox_data.js"></script>
+<script>
+"use strict";
+const $ = (id)=>document.getElementById(id);
+const KEY = "domtrip_ox_v1";
+const ALL = (window.OX_DATA ? OX_DATA.cards : []);
+// 出題範囲。「地理」は cram-sheet.md から自動生成した都道府県カード（subject は科目3だが数が多いので分ける）
+const FILTERS = [
+  {k:"all",  label:"全部",  test:c=>true},
+  {k:"s1",   label:"科目1", test:c=>c.subject==="科目1"},
+  {k:"s2",   label:"科目2", test:c=>c.subject==="科目2"},
+  {k:"s3",   label:"科目3", test:c=>c.subject==="科目3" && !c.gen},
+  {k:"geo",  label:"地理",  test:c=>c.gen},
+];
+let sessionMode=false;
+
+// ---------- 永続化 ----------
+// cards[id] = {c: 正解数, w: 誤答数}
+// laps[filterKey] = {lap: 現在の周回番号(1始まり), shown: この周でもう出したid配列}
+// 周回の定義: 選んだ範囲の全カードを1回ずつ出し終えたら1周。○×だけモードも同じ周回に数える
+let STATE = { cards:{}, laps:{}, filter:"all", mode:"learn", total:0, correct:0 };
+function loadState(){
+  try{ const raw=localStorage.getItem(KEY); if(raw) STATE=Object.assign(STATE,JSON.parse(raw)); }
+  catch(e){ sessionMode=true; }
+}
+function saveState(){
+  if(sessionMode) return;
+  try{ localStorage.setItem(KEY, JSON.stringify(STATE)); }
+  catch(e){ sessionMode=true; renderWarn(); }
+}
+function renderWarn(){
+  $("warn").innerHTML = sessionMode
+    ? '<div class="warn">この環境では進捗を保存できません（file:// やプライベートモード）。https の URL から開いてください。</div>' : "";
+}
+
+// ---------- 出題 ----------
+const pool = ()=> ALL.filter(FILTERS.find(f=>f.k===STATE.filter).test);
+function lapState(){
+  const k=STATE.filter;
+  if(!STATE.laps[k]) STATE.laps[k]={lap:1, shown:[]};
+  return STATE.laps[k];
+}
+function pickCard(){
+  const cards=pool(); if(!cards.length) return null;
+  const ls=lapState();
+  let rest=cards.filter(c=>!ls.shown.includes(c.id));
+  if(!rest.length){ ls.lap++; ls.shown=[]; rest=cards; }
+  // 周回内はランダム順。○×だけモードでは間違えが多い札を出やすくする（重み 1+誤答×2）
+  if(STATE.mode==="quiz"){
+    const w=rest.map(c=>1+((STATE.cards[c.id]||{}).w||0)*2);
+    let r=Math.random()*w.reduce((a,b)=>a+b,0);
+    for(let i=0;i<rest.length;i++){ r-=w[i]; if(r<=0) return rest[i]; }
+  }
+  return rest[Math.floor(Math.random()*rest.length)];
+}
+let cur=null, curStmt=null;
+function nextQuestion(){
+  cur=pickCard();
+  if(!cur){ renderHome(); return; }
+  curStmt=cur.statements[Math.floor(Math.random()*cur.statements.length)];
+  lapState().shown.push(cur.id); saveState();
+  renderQuestion();
+}
+function answer(ans){
+  const hit = (ans===curStmt.answer);
+  const s=STATE.cards[cur.id]||(STATE.cards[cur.id]={c:0,w:0});
+  if(hit) s.c++; else s.w++;
+  STATE.total++; if(hit) STATE.correct++;
+  saveState();
+  renderQuestion(hit);
+}
+
+// ---------- 画面 ----------
+const esc=(s)=>String(s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
+function factHtml(){ return `<div class="fact"><span class="lbl">覚える1行</span>${esc(cur.fact)}</div>`; }
+function progressHtml(){
+  const cards=pool(), ls=lapState();
+  return `<div class="muted" style="display:flex;justify-content:space-between"><span>${esc(FILTERS.find(f=>f.k===STATE.filter).label)}・<b>${ls.lap}周目</b> ${ls.shown.length}/${cards.length}</span><span>${esc(cur.title)}</span></div>
+  <div class="bar"><div class="fill" style="width:${cards.length?Math.round(ls.shown.length/cards.length*100):0}%"></div></div>`;
+}
+function renderQuestion(result){
+  const answered = (result!==undefined);
+  const showFact = STATE.mode==="learn" || answered;   // ○×だけモードは答えた後に覚える1行を出す
+  const stmt=curStmt;
+  $("screen").innerHTML = `
+  <div class="card">
+    ${progressHtml()}
+    ${showFact ? factHtml() : ""}
+    <div class="stem">${esc(stmt.text)}</div>
+    <div class="ox">
+      <button class="o ${answered?(stmt.answer?'hit':(result?'':'miss')):''}" id="bO" ${answered?'disabled':''}>○</button>
+      <button class="x ${answered?(!stmt.answer?'hit':(result?'':'miss')):''}" id="bX" ${answered?'disabled':''}>×</button>
+    </div>
+    ${answered ? `<div class="judge ${result?'ok':'ng'}">${result?'正解！':'ちがう…'} 答えは <b>${stmt.answer?'○':'×'}</b></div>
+      <button class="primary next" id="bNext">次へ →</button>` : ''}
+    <div class="row" style="margin-top:14px"><button id="bHome" style="font-size:.85rem">ホームへ</button></div>
+  </div>`;
+  if(!answered){ $("bO").onclick=()=>answer(true); $("bX").onclick=()=>answer(false); }
+  else{ $("bNext").onclick=nextQuestion; $("bNext").focus(); }
+  $("bHome").onclick=renderHome;
+}
+function renderHome(){
+  const acc = STATE.total?Math.round(STATE.correct/STATE.total*100):0;
+  const weak = ALL.map(c=>({c, s:STATE.cards[c.id]})).filter(x=>x.s && x.s.w>0 && x.s.w>=x.s.c)
+    .sort((a,b)=>b.s.w-a.s.w).slice(0,5);
+  const lapRows = FILTERS.map(f=>{
+    const n=ALL.filter(f.test).length, ls=STATE.laps[f.k];
+    return `<div class="stat"><span>${esc(f.label)} <span class="muted">(${n}枚)</span></span><span>${ls?`<b>${ls.lap}周目</b> ${ls.shown.length}/${n}`:'—'}</span></div>`;
+  }).join("");
+  $("screen").innerHTML = `
+  <div class="card">
+    <div class="muted" style="margin-bottom:6px">モード</div>
+    <div class="seg" id="modeSeg">
+      <button data-m="learn" class="${STATE.mode==='learn'?'on':''}">📖 覚える＋○×</button>
+      <button data-m="quiz" class="${STATE.mode==='quiz'?'on':''}">⚡ ○×だけ</button>
+    </div>
+    <div class="muted" style="margin:12px 0 6px">範囲</div>
+    <div class="seg" id="filtSeg">${FILTERS.map(f=>`<button data-f="${f.k}" class="${STATE.filter===f.k?'on':''}">${esc(f.label)}</button>`).join("")}</div>
+    <button class="primary next" id="bStart" style="margin-top:16px">はじめる</button>
+    <div class="muted" style="margin-top:8px">${STATE.mode==='learn'?'覚える1行を読んでから○×。1枚10秒。':'○×だけ出る。答えた後に覚える1行が出る。間違えた札が出やすい。'}</div>
+  </div>
+  <div class="card">
+    <div class="muted">周回（範囲の全カードを1回ずつ出し終えたら1周）</div>
+    ${lapRows}
+    <div class="stat" style="margin-top:8px"><span>累計</span><span><b>${STATE.total}</b>問 ／ 正答率 <b>${acc}%</b></span></div>
+  </div>
+  ${weak.length?`<div class="card"><div class="muted">苦手（誤答≧正解）</div>${weak.map(x=>`<div class="stat"><span>${esc(x.c.title)}</span><span>×${x.s.w} ○${x.s.c}</span></div>`).join("")}</div>`:''}
+  <div class="row" style="justify-content:flex-end"><button id="bReset" style="font-size:.75rem;color:#c62828">進捗をリセット</button></div>
+  <div class="muted" style="margin-top:8px">データ: ${ALL.length}枚 ／ 生成日 ${window.OX_DATA?esc(OX_DATA.generatedAt):'-'}。元データは <code>ox-cards.md</code>（地理は <code>cram-sheet.md</code> から自動生成）。</div>`;
+  $("modeSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{STATE.mode=b.dataset.m; saveState(); renderHome();});
+  $("filtSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{STATE.filter=b.dataset.f; saveState(); renderHome();});
+  $("bStart").onclick=nextQuestion;
+  $("bReset").onclick=()=>{ if(confirm("○×の進捗（周回・正誤）を全部消します。過去問アプリの進捗は消えません。")){ STATE={cards:{},laps:{},filter:STATE.filter,mode:STATE.mode,total:0,correct:0}; saveState(); renderHome(); } };
+}
+
+// キーボード: o/1=○, x/2=×, Enter/Space=次へ（PCで指を動かさずに回すため）
+document.addEventListener("keydown",(e)=>{
+  if(e.key==="o"||e.key==="1"){ const b=$("bO"); if(b&&!b.disabled) b.click(); }
+  else if(e.key==="x"||e.key==="2"){ const b=$("bX"); if(b&&!b.disabled) b.click(); }
+  else if(e.key==="Enter"||e.key===" "){ const b=$("bNext")||$("bStart"); if(b){ e.preventDefault(); b.click(); } }
+});
+
+loadState(); renderWarn();
+if(!ALL.length){ $("screen").innerHTML='<div class="warn">ox_data.js が読み込めません。<code>python3 tools/build_ox_data.py</code> を実行してください。</div>'; }
+else renderHome();
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>

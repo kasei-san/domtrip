@@ -5,6 +5,7 @@
 ## 公開ページ（GitHub Pages）
 - 📱 **学習アプリ（クイズ）**: <https://kasei-san.com/domtrip/>
 - 📊 **ダッシュボード**: <https://kasei-san.com/domtrip/dashboard.html>
+- 🫛 **1行暗記○×（やる気ゼロの日用）**: <https://kasei-san.com/domtrip/ox.html>
 - 📝 **暗記シート（通勤用）**: <https://kasei-san.com/domtrip/cram-sheet.html>
 
 ## 何があるか
@@ -13,6 +14,7 @@
 |---|---|
 | `index.html` | 過去問クイズアプリ（4択・解答リビュー・暗記カード・苦手復習）。進捗は localStorage に保存 |
 | `dashboard.html` | 到達度・正答率・周回・連続日数・カウントダウンを表示。アプリと同じ進捗をライブ集計 |
+| `ox.html` / `ox-cards.md` / `ox_data.js` | 1行暗記○×アプリ。「覚える1行→○×1問」を繰り返し、範囲ごとの周回数を表示。進捗は別キーの localStorage |
 | `app_data.js` | アプリが読む問題データ（`tools/build_app_data.py` が生成・編集禁止） |
 | `sw.js` / `manifest.webmanifest` / `icon.svg` | PWA用（ホーム画面追加でオフライン動作） |
 | `questions/` | 過去問を構造化した Markdown（科目1旅行業法 / 科目2約款 / 科目3国内旅行実務 × R03〜R07） |
