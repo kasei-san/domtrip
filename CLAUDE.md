@@ -24,11 +24,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 開発コマンド
 
-テスト・lint は存在しない。ビルドは1本だけ。
+テスト・lint は存在しない。ビルドは2本（過去問アプリ用と1行暗記○×用）。
 
 ```sh
 # questions/*.md と cram-sheet.md → app_data.js を再生成（md 編集後は必須）
 python3 tools/build_app_data.py
+
+# ox-cards.md と cram-sheet.md の観光地理リスト → ox_data.js を再生成（1行暗記○×アプリ ox.html 用）
+python3 tools/build_ox_data.py
 
 # ローカル確認（file:// では app_data.js 読込も localStorage も動かない）
 python3 -m http.server 8731   # → http://localhost:8731/index.html
@@ -36,7 +39,7 @@ python3 -m http.server 8731   # → http://localhost:8731/index.html
 
 - ビルドは末尾に JSON で `perFile` のカード数を出す。**科目1・科目2は各年度25問、科目3は34〜38問**が期待値。ずれたら `###` 見出しや `<details>` の崩れを疑う。
 - ビルドを走らせると `app_data.js` の `generatedAt` が今日の日付に変わる。md を変えていないのに実行した場合は `git checkout -- app_data.js` で戻す。
-- `app_data.js` は生成物なので手で編集しない。
+- `app_data.js` は生成物なので手で編集しない。`ox_data.js` も同じ（`build_ox_data.py` は末尾に枚数と○の比率を出す。○の比率が 0.4〜0.6 を外れたら `ox-cards.md` の○×バランスを直す）。
 
 ## アーキテクチャ（複数ファイルにまたがる前提）
 
@@ -51,6 +54,13 @@ python3 -m http.server 8731   # → http://localhost:8731/index.html
 
 ### ⚠️ カードIDの不変条件（進捗を壊さないために最重要）
 カードIDは `{年度}-{科目}-{ファイル内の出現順:02d}`（例 `R07-科目1-03`）で、**問番号ではなくファイル内の `###` ブロックの順番**で決まる。localStorage の進捗はこのIDに紐づくため、**既存の問題集の途中で `###` ブロックを追加・削除・並べ替えすると、その位置以降の札に紐づく各ブラウザの進捗がずれて事実上消える**。既存問題の修正は本文・解説・選択肢の編集に留め、ブロック構成は変えないこと。
+
+### 1行暗記○×アプリ（`ox.html`、別URL）
+`ox-cards.md` →（`tools/build_ox_data.py`）→ `ox_data.js`（`window.OX_DATA`）→ `ox.html`。過去問アプリとは独立で、進捗は `localStorage['domtrip_ox_v1']`。「覚える1行を読む→○×1問」の最小単位で詰め込む用途（やる気が出ない日向け）。モードは「覚える＋○×」と「○×だけ（答えた後に1行が出る）」、周回＝選んだ範囲の全カードを1回ずつ出し終えたら1周。
+- 書式: `## 科目N` → `### <id> タイトル` → `覚える: 〜` 1行 → `- ○ 文` / `- × 文`（複数可、○×を混ぜる）
+- **id は明示・不変**（`law-01` 等）。進捗は id に紐づくので、途中に足すときも既存 id を振り直さず末尾番号を使う
+- 都道府県別の観光地理カード（`geo-<県>`）は `cram-sheet.md` の `### 観光地理 暗記リスト` から自動生成される（○＝正しい県、×＝同じ地方の別の県に差し替え）。`※` 付き注記の項目は誤答化を避けて除外
+- ○×の文は `cram-sheet.md` か `questions/` の解説に根拠があるものだけ。×は過去問のひっかけ（数字・主体・向きの入れ替え）に寄せる
 
 ### 問題集 md の書式（パーサが依存する）
 - 見出し: `### 問N [論点: ○○]`（`[論点: ...]` が topic になる）
@@ -68,7 +78,7 @@ python3 -m http.server 8731   # → http://localhost:8731/index.html
 ## デプロイ / 公開（GitHub Pages）
 - リポジトリ `kasei-san/domtrip`（public）、Pages source = `main` / `(root)`。公開URLは <https://kasei-san.com/domtrip/>（`kasei-san.github.io/domtrip/` はリダイレクト）。
 - **ブランチ → PR → main へマージで数十秒後に自動デプロイ**（main への直接 push はしない）。
-- **キャッシュ更新チェックリスト**: 公開ページの見た目・挙動を変えたら、`sw.js` の `CACHE`（`domtrip-vN`）を上げ、**5つの HTML に埋め込まれたバージョン表示行も同じ版に揃える**。場所は `grep -n "ver\. " *.html` で探す（`index.html` / `dashboard.html` / `cram-sheet.html` / `study-plan.html` / `app-spec.html`）。
+- **キャッシュ更新チェックリスト**: 公開ページの見た目・挙動を変えたら、`sw.js` の `CACHE`（`domtrip-vN`）を上げ、**6つの HTML に埋め込まれたバージョン表示行も同じ版に揃える**。場所は `grep -n "ver\. " *.html` で探す（`index.html` / `dashboard.html` / `ox.html` / `cram-sheet.html` / `study-plan.html` / `app-spec.html`）。
 - `cram-sheet.html` / `study-plan.html` / `app-spec.html` は対応する md から pandoc で生成した HTML だが、**バージョン表示行は生成後に手で挿入されている**。再生成コマンドは記録されていないので、pandoc で作り直す場合はバージョン行を再挿入すること。
 - iOS は file:// だと localStorage 不可なので必ず https URL から使う。
 
