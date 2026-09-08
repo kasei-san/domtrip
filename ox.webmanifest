@@ -1,0 +1,15 @@
+{
+  "name": "1行暗記○×（国内旅行）",
+  "short_name": "1行暗記○×",
+  "description": "国内旅行業務取扱管理者試験の頻出論点を「覚える1行→○×1問」で詰め込む（オフライン）",
+  "start_url": "ox.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f1f8e9",
+  "theme_color": "#43a047",
+  "lang": "ja",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

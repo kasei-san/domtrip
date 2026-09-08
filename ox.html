@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>🫛 1行暗記○×</title>
-<link rel="manifest" href="manifest.webmanifest">
+<link rel="manifest" href="ox.webmanifest">
 <meta name="theme-color" content="#43a047">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -82,8 +82,13 @@ let sessionMode=false;
 // 周回の定義: 選んだ範囲の全カードを1回ずつ出し終えたら1周。○×だけモードも同じ周回に数える
 let STATE = { cards:{}, laps:{}, filter:"all", mode:"learn", total:0, correct:0 };
 function loadState(){
-  try{ const raw=localStorage.getItem(KEY); if(raw) STATE=Object.assign(STATE,JSON.parse(raw)); }
-  catch(e){ sessionMode=true; }
+  let raw=null;
+  try{ raw=localStorage.getItem(KEY); }
+  catch(e){ sessionMode=true; return; }
+  // JSON が壊れていても保存自体は可能なので、初期値のまま続ける（sessionMode にはしない）
+  try{ if(raw) STATE=Object.assign(STATE,JSON.parse(raw)); }catch(e){}
+  if(!FILTERS.some(f=>f.k===STATE.filter)) STATE.filter="all";
+  if(STATE.mode!=="learn" && STATE.mode!=="quiz") STATE.mode="learn";
 }
 function saveState(){
   if(sessionMode) return;

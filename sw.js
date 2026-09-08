@@ -6,6 +6,7 @@ const ASSETS = [
   "dashboard.html",
   "ox.html",
   "ox_data.js",
+  "ox.webmanifest",
   "app_data.js",
   "manifest.webmanifest",
   "icon.svg",

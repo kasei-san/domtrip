@@ -153,8 +153,14 @@ def main():
             errors.append(f"{c['id']}: 覚える行がない")
         if not c["statements"]:
             errors.append(f"{c['id']}: ○×問題がない")
+        elif not (any(s["answer"] for s in c["statements"]) and any(not s["answer"] for s in c["statements"])):
+            errors.append(f"{c['id']}: ○と×の両方を用意する（片方だけだと押す前に答えが決まる）")
     geo = gen_geo_cards(parse_geo())
     cards += geo
+    n_true = sum(1 for c in cards for s in c["statements"] if s["answer"])
+    n_all = sum(len(c["statements"]) for c in cards)
+    if n_all and not (0.4 <= n_true / n_all <= 0.6):
+        errors.append(f"全体の○比率 {n_true/n_all:.2f} が 0.4〜0.6 を外れている（×連打で解けてしまう）")
     ids = [c["id"] for c in cards]
     dup = sorted({i for i in ids if ids.count(i) > 1})
     if dup:
