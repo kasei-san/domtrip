@@ -314,6 +314,11 @@ function recordAnswer(correct) {
     (correct ? "⭕ 記録したのだ" : "❌ 記録したのだ") + "（押し間違えたらもう片方をタップで訂正できるのだ）";
 }
 
+function searchTerm(term) {
+  // 「分福茶釜（茂林寺）」のような括弧付き注記は検索クエリからは外す（Wikipedia記事名・地図検索がズレるため）
+  return term.replace(/（.*?）/g, "").trim() || term;
+}
+
 async function loadDetail(term, pref) {
   const myToken = ++fetchToken;
   const loading = document.getElementById("detailLoading");
@@ -323,6 +328,7 @@ async function loadDetail(term, pref) {
   const source = document.getElementById("detailSource");
   const map = document.getElementById("detailMap");
   const imgLink = document.getElementById("detailImgLink");
+  const q = searchTerm(term);
 
   loading.style.display = "block";
   loading.textContent = "読み込み中…";
@@ -330,19 +336,19 @@ async function loadDetail(term, pref) {
   imgNote.textContent = "";
   extract.textContent = "";
   source.textContent = "";
-  map.src = `https://www.google.com/maps?q=${encodeURIComponent(term + " " + pref)}&z=9&output=embed`;
-  imgLink.href = `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(term + " " + pref)}`;
+  map.src = `https://www.google.com/maps?q=${encodeURIComponent(q + " " + pref)}&z=9&output=embed`;
+  imgLink.href = `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(q + " " + pref)}`;
 
-  loadImages(term, pref, myToken, imgGrid, imgNote);
+  loadImages(q, pref, myToken, imgGrid, imgNote);
 
   try {
-    let data = wikiCache.get(term);
+    let data = wikiCache.get(q);
     if (!data) {
-      const res = await fetch(`https://ja.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(term)}`);
+      const res = await fetch(`https://ja.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`);
       if (myToken !== fetchToken) return;
       if (!res.ok) throw new Error("not found");
       data = await res.json();
-      wikiCache.set(term, data);
+      wikiCache.set(q, data);
     }
     if (myToken !== fetchToken) return;
     loading.style.display = "none";
