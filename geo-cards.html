@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>観光地理 単語帳</title>
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    font-family: -apple-system, "Hiragino Sans", "Yu Gothic", sans-serif;
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 20px 16px 60px;
+    background: #fdfaf5;
+    color: #2b2620;
+  }
+  h1 { font-size: 1.1em; color: #6b6252; margin-bottom: 4px; text-align: center; }
+  .tabs { display: flex; gap: 8px; justify-content: center; margin-bottom: 16px; }
+  .tabs button {
+    flex: 1; max-width: 160px;
+    font-size: 0.95em; padding: 8px 12px; border-radius: 10px 10px 0 0;
+    border: none; cursor: pointer; background: #efe3cd; color: #6b6252;
+  }
+  .tabs button.active { background: #c9622a; color: #fff; font-weight: bold; }
+  .progress { font-size: 0.9em; color: #8a7f6a; margin-bottom: 12px; text-align: center; }
+  .card {
+    background: #fff; border: 2px solid #ddd0b8; border-radius: 16px;
+    min-height: 140px; display: flex; align-items: center; justify-content: center;
+    padding: 24px; font-size: 1.6em; font-weight: bold; cursor: pointer;
+    user-select: none; box-shadow: 0 2px 8px rgba(0,0,0,0.06); text-align: center;
+  }
+  .card.answer { color: #c9622a; }
+  .hint { font-size: 0.7em; color: #a89b7d; font-weight: normal; margin-top: 8px; }
+  .buttons { display: flex; gap: 10px; margin-top: 16px; justify-content: center; flex-wrap: wrap; }
+  button {
+    font-size: 1em; padding: 10px 16px; border-radius: 10px; border: none;
+    cursor: pointer; background: #efe3cd; color: #2b2620;
+  }
+  button.primary { background: #c9622a; color: #fff; }
+  button.ok { background: #4a7c3c; color: #fff; }
+  button.ng { background: #b3261e; color: #fff; }
+  button:disabled { opacity: 0.4; cursor: default; }
+  button:active:not(:disabled) { opacity: 0.8; }
+  select {
+    font-size: 0.95em; padding: 6px 10px; border-radius: 8px;
+    margin-bottom: 14px; border: 1px solid #ddd0b8; width: 100%;
+  }
+  .recorded { font-size: 0.85em; color: #4a7c3c; text-align: center; margin-top: 8px; min-height: 1.4em; }
+  .detail {
+    text-align: left; margin-top: 16px; background: #fff; border: 1px solid #ddd0b8;
+    border-radius: 12px; padding: 14px; display: none;
+  }
+  .detail.show { display: block; }
+  .detail .imggrid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; }
+  .detail .imggrid img { width: 100%; height: 100px; object-fit: cover; border-radius: 8px; background: #eee; cursor: zoom-in; }
+  .detail .imggrid img.enlarged { height: auto; grid-column: 1 / -1; }
+  .detail .imgnote { font-size: 0.72em; color: #a89b7d; margin: -6px 0 10px; }
+  .detail .imglink { display: inline-block; font-size: 0.8em; margin: -4px 0 10px; color: #c9622a; text-decoration: none; }
+  .detail .imglink:hover { text-decoration: underline; }
+  .detail .extract { font-size: 0.9em; line-height: 1.6; margin-bottom: 10px; }
+  .detail .source { font-size: 0.75em; color: #a89b7d; margin-bottom: 10px; }
+  .detail iframe { width: 100%; height: 220px; border: 0; border-radius: 8px; }
+  .detail .loading { font-size: 0.85em; color: #a89b7d; padding: 20px 0; text-align: center; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.85em; }
+  th, td { padding: 6px 8px; border-bottom: 1px solid #eee0c8; text-align: right; }
+  th:first-child, td:first-child { text-align: left; }
+  th { cursor: pointer; background: #f0e4d0; position: sticky; top: 0; user-select: none; white-space: nowrap; }
+  th.sorted { color: #c9622a; }
+  tr.unseen td { color: #a89b7d; }
+  tr.weak td { background: #fff0e8; }
+  .statsHead { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+  .statsHead .summary { font-size: 0.85em; color: #6b6252; }
+  .tableWrap { overflow-x: auto; }
+</style>
+</head>
+<body>
+
+<h1>観光地理 単語帳</h1>
+
+<div class="tabs">
+  <button id="tabStudy" class="active" onclick="showView('study')">単語帳</button>
+  <button id="tabStats" onclick="showView('stats')">成績</button>
+</div>
+
+<div id="viewStudy">
+  <select id="regionSelect"></select>
+  <div class="progress" id="progress"></div>
+
+  <div class="card" id="card" onclick="flip()">
+    <div>
+      <div id="cardText"></div>
+      <div class="hint" id="cardHint"></div>
+    </div>
+  </div>
+
+  <div class="buttons" id="scoreButtons" style="display:none;">
+    <button class="ng" onclick="recordAnswer(false)">❌ 不正解</button>
+    <button class="ok" onclick="recordAnswer(true)">⭕ 正解</button>
+  </div>
+  <div class="recorded" id="recordedMsg"></div>
+
+  <div class="buttons">
+    <button onclick="prevCard()">← 前</button>
+    <button class="primary" onclick="flip()">裏返す</button>
+    <button onclick="nextCard()">次 →</button>
+  </div>
+  <div class="buttons">
+    <button onclick="shuffleCards()">シャッフル</button>
+  </div>
+
+  <div class="detail" id="detail">
+    <div class="loading" id="detailLoading">読み込み中…</div>
+    <div class="imggrid" id="detailImgGrid"></div>
+    <div class="imgnote" id="detailImgNote"></div>
+    <a class="imglink" id="detailImgLink" href="#" target="_blank" rel="noopener">🔍 Google画像でこの場所を検索</a>
+    <div class="extract" id="detailExtract"></div>
+    <div class="source" id="detailSource"></div>
+    <iframe id="detailMap" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+  </div>
+</div>
+
+<div id="viewStats" style="display:none;">
+  <div class="statsHead">
+    <div class="summary" id="statsSummary"></div>
+    <button onclick="resetStats()">記録をリセット</button>
+  </div>
+  <div class="tableWrap">
+    <table id="statsTable">
+      <thead>
+        <tr>
+          <th data-key="term">地名</th>
+          <th data-key="pref">県</th>
+          <th data-key="seen">回数</th>
+          <th data-key="correct">正解</th>
+          <th data-key="wrong">不正解</th>
+          <th data-key="correctRate">正答率</th>
+          <th data-key="wrongRate">不正解率</th>
+        </tr>
+      </thead>
+      <tbody id="statsBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+// 地名 -> 都道府県（cram-sheet.md 観光地理 暗記リストより）
+const RAW = {
+"北海道・東北": [
+  ["屈斜路湖","北海道"], ["支笏湖","北海道"], ["羊ヶ丘展望台","北海道"], ["定山渓温泉","北海道"], ["登別温泉","北海道"], ["オシンコシンの滝","北海道"], ["神威岬","北海道"],
+  ["奥入瀬渓流","青森"], ["三内丸山遺跡","青森"], ["弘前城","青森"], ["浅虫温泉","青森"],
+  ["龍泉洞","岩手"], ["猊鼻渓","岩手"], ["小岩井農場","岩手"], ["遠野","岩手"],
+  ["松島","宮城"], ["作並温泉","宮城"],
+  ["田沢湖","秋田"], ["後生掛温泉","秋田"],
+  ["銀山温泉","山形"], ["かみのやま温泉","山形"], ["致道館","山形"],
+  ["大内宿","福島"], ["五色沼","福島"], ["東山温泉","福島"]
+],
+"関東": [
+  ["偕楽園","茨城"], ["袋田の滝","茨城"],
+  ["日光東照宮","栃木"], ["華厳ノ滝","栃木"], ["足利学校","栃木"],
+  ["吹割の滝","群馬"], ["伊香保温泉","群馬"], ["草津温泉","群馬"], ["鬼押出し","群馬"],
+  ["長瀞","埼玉"], ["渋沢栄一記念館","埼玉"],
+  ["鶴岡八幡宮","神奈川"], ["猿島","神奈川"]
+],
+"中部": [
+  ["三嶋大社","静岡"], ["登呂遺跡","静岡"], ["三保松原","静岡"], ["浜名湖","静岡"], ["浄蓮の滝","静岡"],
+  ["善光寺","長野"], ["松本城","長野"], ["妻籠宿","長野"], ["寝覚の床","長野"],
+  ["身延山久遠寺","山梨"], ["忍野八海","山梨"], ["御岳昇仙峡","山梨"],
+  ["宇奈月温泉","富山"], ["雨晴海岸","富山"],
+  ["兼六園","石川"], ["和倉温泉","石川"],
+  ["永平寺","福井"], ["東尋坊","福井"], ["気比の松原","福井"],
+  ["白川郷","岐阜"], ["新穂高温泉","岐阜"], ["恵那峡","岐阜"],
+  ["犬山城","愛知"], ["豊川稲荷","愛知"], ["熱田神宮","愛知"]
+],
+"近畿": [
+  ["伊勢志摩","三重"], ["二見浦","三重"],
+  ["彦根城","滋賀"], ["竹生島","滋賀"], ["おごと温泉","滋賀"],
+  ["清水寺","京都"], ["平等院","京都"], ["鞍馬寺","京都"], ["産寧坂","京都"],
+  ["吉野山","奈良"],
+  ["那智の滝","和歌山"], ["橋杭岩","和歌山"], ["白浜温泉","和歌山"], ["三段壁","和歌山"], ["高野山","和歌山"],
+  ["姫路城","兵庫"], ["有馬温泉","兵庫"], ["城崎温泉","兵庫"], ["竹田城跡","兵庫"], ["淡路島","兵庫"]
+],
+"中国・四国": [
+  ["三朝温泉","鳥取"], ["皆生温泉","鳥取"], ["弓ヶ浜","鳥取"],
+  ["石見銀山","島根"], ["宍道湖","島根"], ["出雲大社","島根"], ["松江城","島根"], ["足立美術館","島根"], ["隠岐","島根"],
+  ["後楽園","岡山"], ["倉敷美観地区","岡山"], ["鷲羽山","岡山"],
+  ["宮島","広島"], ["縮景園","広島"], ["しまなみ海道","広島"], ["鞆の浦","広島"],
+  ["錦帯橋","山口"], ["秋芳洞","山口"], ["関門橋","山口"],
+  ["金刀比羅宮","香川"], ["小豆島","香川"], ["直島","香川"],
+  ["大塚国際美術館","徳島"], ["大歩危","徳島"], ["祖谷","徳島"],
+  ["石鎚山","愛媛"], ["道後温泉","愛媛"], ["内子座","愛媛"],
+  ["桂浜","高知"], ["室戸岬","高知"]
+],
+"九州・沖縄": [
+  ["門司港レトロ","福岡"], ["太宰府天満宮","福岡"], ["柳川","福岡"],
+  ["唐津くんち","佐賀"], ["嬉野温泉","佐賀"], ["吉野ヶ里遺跡","佐賀"],
+  ["大浦天主堂","長崎"], ["原城跡","長崎"], ["出島","長崎"], ["雲仙","長崎"], ["平戸","長崎"],
+  ["通潤橋","熊本"], ["阿蘇","熊本"], ["黒川温泉","熊本"], ["人吉温泉","熊本"],
+  ["別府温泉","大分"], ["由布院温泉","大分"], ["鉄輪温泉","大分"],
+  ["西都原古墳群","宮崎"], ["鵜戸神宮","宮崎"], ["日南海岸","宮崎"], ["飫肥城","宮崎"],
+  ["知覧","鹿児島"], ["指宿温泉","鹿児島"], ["仙巌園","鹿児島"], ["霧島神宮","鹿児島"], ["屋久島","鹿児島"],
+  ["首里城","沖縄"], ["識名園","沖縄"], ["今帰仁城跡","沖縄"], ["川平湾","沖縄"], ["万座毛","沖縄"]
+]
+};
+
+// id は地名そのもの（データセット内で一意）。進捗は id に紐づくため、
+// 地名の表記を変えると既存の成績記録が引き継がれなくなる点に注意。
+const ALL_CARDS = [];
+for (const [region, items] of Object.entries(RAW)) {
+  for (const [term, pref] of items) {
+    ALL_CARDS.push({ id: term, term, pref, region });
+  }
+}
+
+const STORAGE_KEY = "domtrip_geo_v1";
+
+function loadStats() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return {};
+    const data = JSON.parse(raw);
+    return (data && typeof data === "object" && data.cards) ? data.cards : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+function saveStats(stats) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ cards: stats, updatedAt: Date.now() }));
+  } catch (e) {}
+}
+
+let stats = loadStats();
+
+function statFor(id) {
+  return stats[id] || { seen: 0, correct: 0, wrong: 0 };
+}
+
+function wrongRate(s) {
+  return s.seen > 0 ? s.wrong / s.seen : null;
+}
+
+let deck = [];
+let idx = 0;
+let showingAnswer = false;
+let answeredThisCard = false;
+let fetchToken = 0;
+
+function buildDeck(mode) {
+  if (mode === "__weak__") {
+    deck = ALL_CARDS.slice().sort((a, b) => {
+      const sa = statFor(a.id), sb = statFor(b.id);
+      const ua = sa.seen === 0, ub = sb.seen === 0;
+      if (ua !== ub) return ua ? -1 : 1; // 未回答を優先
+      const ra = wrongRate(sa) ?? 0, rb = wrongRate(sb) ?? 0;
+      return rb - ra; // 不正解率が高い順
+    });
+  } else if (mode === "全部") {
+    deck = ALL_CARDS.slice();
+  } else {
+    deck = ALL_CARDS.filter(c => c.region === mode);
+  }
+  idx = 0;
+  showingAnswer = false;
+  answeredThisCard = false;
+  render();
+}
+
+function render() {
+  const card = document.getElementById("card");
+  const text = document.getElementById("cardText");
+  const hint = document.getElementById("cardHint");
+  const progress = document.getElementById("progress");
+  const detail = document.getElementById("detail");
+  const scoreButtons = document.getElementById("scoreButtons");
+  const recordedMsg = document.getElementById("recordedMsg");
+  if (!deck.length) return;
+  const c = deck[idx];
+  card.classList.toggle("answer", showingAnswer);
+  text.textContent = showingAnswer ? c.pref : c.term;
+  hint.textContent = showingAnswer ? "" : "タップして答えを見る";
+  progress.textContent = `${idx + 1} / ${deck.length}`;
+  recordedMsg.textContent = "";
+
+  if (showingAnswer) {
+    detail.classList.add("show");
+    scoreButtons.style.display = "flex";
+    loadDetail(c.term, c.pref);
+  } else {
+    detail.classList.remove("show");
+    scoreButtons.style.display = "none";
+  }
+}
+
+function recordAnswer(correct) {
+  const c = deck[idx];
+  if (!c || answeredThisCard) return;
+  const s = statFor(c.id);
+  s.seen += 1;
+  if (correct) s.correct += 1; else s.wrong += 1;
+  stats[c.id] = s;
+  saveStats(stats);
+  answeredThisCard = true;
+  document.getElementById("recordedMsg").textContent = correct ? "⭕ 記録したのだ" : "❌ 記録したのだ";
+}
+
+async function loadDetail(term, pref) {
+  const myToken = ++fetchToken;
+  const loading = document.getElementById("detailLoading");
+  const imgGrid = document.getElementById("detailImgGrid");
+  const imgNote = document.getElementById("detailImgNote");
+  const extract = document.getElementById("detailExtract");
+  const source = document.getElementById("detailSource");
+  const map = document.getElementById("detailMap");
+  const imgLink = document.getElementById("detailImgLink");
+
+  loading.style.display = "block";
+  loading.textContent = "読み込み中…";
+  imgGrid.innerHTML = "";
+  imgNote.textContent = "";
+  extract.textContent = "";
+  source.textContent = "";
+  map.src = `https://www.google.com/maps?q=${encodeURIComponent(term + " " + pref)}&z=9&output=embed`;
+  imgLink.href = `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(term + " " + pref)}`;
+
+  loadImages(term, pref, myToken, imgGrid, imgNote);
+
+  try {
+    const res = await fetch(`https://ja.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(term)}`);
+    if (myToken !== fetchToken) return;
+    if (!res.ok) throw new Error("not found");
+    const data = await res.json();
+    if (myToken !== fetchToken) return;
+    loading.style.display = "none";
+    extract.textContent = data.extract || "(概要が取得できなかったのだ)";
+    source.innerHTML = `出典: <a href="${data.content_urls?.desktop?.page || ''}" target="_blank" rel="noopener">Wikipedia「${data.title || term}」</a>`;
+  } catch (e) {
+    if (myToken !== fetchToken) return;
+    loading.style.display = "none";
+    extract.textContent = "Wikipediaから概要を取得できなかったのだ（オフライン、または記事名が一致しない可能性）。下の画像・地図だけ参考にするのだ。";
+    source.textContent = "";
+  }
+}
+
+async function loadImages(term, pref, myToken, imgGrid, imgNote) {
+  try {
+    const q = `${term} ${pref}`;
+    const url = `https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrnamespace=6&gsrsearch=${encodeURIComponent(q)}&gsrlimit=4&prop=imageinfo&iiprop=url|extmetadata&iiurlwidth=400`;
+    const res = await fetch(url);
+    if (myToken !== fetchToken) return;
+    if (!res.ok) throw new Error("commons fetch failed");
+    const data = await res.json();
+    if (myToken !== fetchToken) return;
+    const pages = data.query && data.query.pages ? Object.values(data.query.pages) : [];
+    const withImages = pages
+      .filter(p => p.imageinfo && p.imageinfo[0] && p.imageinfo[0].thumburl)
+      .sort((a, b) => (a.index || 0) - (b.index || 0));
+    if (!withImages.length) {
+      imgNote.textContent = "画像検索でヒットしなかったのだ（Wikimedia Commons）。";
+      return;
+    }
+    imgGrid.innerHTML = "";
+    withImages.slice(0, 4).forEach(p => {
+      const info = p.imageinfo[0];
+      const el = document.createElement("img");
+      el.src = info.thumburl;
+      el.alt = p.title.replace(/^File:/, "");
+      el.title = "タップで拡大／もう一度タップで縮小";
+      el.addEventListener("click", () => el.classList.toggle("enlarged"));
+      imgGrid.appendChild(el);
+    });
+    imgNote.textContent = "画像はWikimedia Commonsの検索結果（先頭4件）。1件目が違う場所の写真の場合があるので他も見てほしいのだ。";
+  } catch (e) {
+    if (myToken !== fetchToken) return;
+    imgNote.textContent = "画像を取得できなかったのだ（オフラインの可能性）。";
+  }
+}
+
+function flip() {
+  showingAnswer = !showingAnswer;
+  render();
+}
+
+function nextCard() {
+  idx = (idx + 1) % deck.length;
+  showingAnswer = false;
+  answeredThisCard = false;
+  render();
+}
+
+function prevCard() {
+  idx = (idx - 1 + deck.length) % deck.length;
+  showingAnswer = false;
+  answeredThisCard = false;
+  render();
+}
+
+function shuffleCards() {
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+  idx = 0;
+  showingAnswer = false;
+  answeredThisCard = false;
+  render();
+}
+
+const select = document.getElementById("regionSelect");
+function rebuildSelectOptions() {
+  const weakCount = ALL_CARDS.filter(c => {
+    const s = statFor(c.id);
+    return s.seen === 0 || wrongRate(s) > 0;
+  }).length;
+  select.innerHTML = "";
+  const opts = [
+    ["__weak__", `🎯 弱点特訓（未回答＋不正解率順・${weakCount}枚）`],
+    ["全部", `全部（${ALL_CARDS.length}枚）`],
+    ...Object.keys(RAW).map(r => [r, `${r}（${RAW[r].length}枚）`]),
+  ];
+  for (const [value, label] of opts) {
+    const opt = document.createElement("option");
+    opt.value = value;
+    opt.textContent = label;
+    select.appendChild(opt);
+  }
+}
+rebuildSelectOptions();
+select.addEventListener("change", () => buildDeck(select.value));
+buildDeck("全部");
+
+// ---- 成績タブ ----
+let sortKey = "wrongRate";
+let sortDir = "desc";
+
+function showView(view) {
+  document.getElementById("viewStudy").style.display = view === "study" ? "block" : "none";
+  document.getElementById("viewStats").style.display = view === "stats" ? "block" : "none";
+  document.getElementById("tabStudy").classList.toggle("active", view === "study");
+  document.getElementById("tabStats").classList.toggle("active", view === "stats");
+  if (view === "stats") renderStats();
+  if (view === "study") rebuildSelectOptions();
+}
+
+function renderStats() {
+  const rows = ALL_CARDS.map(c => {
+    const s = statFor(c.id);
+    const cr = s.seen > 0 ? s.correct / s.seen : null;
+    const wr = s.seen > 0 ? s.wrong / s.seen : null;
+    return { ...c, seen: s.seen, correct: s.correct, wrong: s.wrong, correctRate: cr, wrongRate: wr };
+  });
+
+  rows.sort((a, b) => {
+    let va = a[sortKey], vb = b[sortKey];
+    if (va === null) va = sortDir === "desc" ? -1 : 2;
+    if (vb === null) vb = sortDir === "desc" ? -1 : 2;
+    const cmp = typeof va === "string" ? va.localeCompare(vb, "ja") : va - vb;
+    return sortDir === "asc" ? cmp : -cmp;
+  });
+
+  const tbody = document.getElementById("statsBody");
+  tbody.innerHTML = "";
+  for (const r of rows) {
+    const tr = document.createElement("tr");
+    tr.className = r.seen === 0 ? "unseen" : (r.wrongRate !== null && r.wrongRate >= 0.5 ? "weak" : "");
+    tr.innerHTML = `
+      <td>${r.term}</td>
+      <td>${r.pref}</td>
+      <td>${r.seen}</td>
+      <td>${r.correct}</td>
+      <td>${r.wrong}</td>
+      <td>${r.correctRate === null ? "-" : Math.round(r.correctRate * 100) + "%"}</td>
+      <td>${r.wrongRate === null ? "-" : Math.round(r.wrongRate * 100) + "%"}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  const answered = rows.filter(r => r.seen > 0).length;
+  document.getElementById("statsSummary").textContent =
+    `回答済み ${answered} / ${rows.length} 枚`;
+
+  document.querySelectorAll("#statsTable th").forEach(th => {
+    th.classList.toggle("sorted", th.dataset.key === sortKey);
+  });
+}
+
+document.querySelectorAll("#statsTable th").forEach(th => {
+  th.addEventListener("click", () => {
+    const key = th.dataset.key;
+    if (sortKey === key) {
+      sortDir = sortDir === "asc" ? "desc" : "asc";
+    } else {
+      sortKey = key;
+      sortDir = (key === "term" || key === "pref") ? "asc" : "desc";
+    }
+    renderStats();
+  });
+});
+
+function resetStats() {
+  if (!confirm("成績の記録をすべて削除するのだ。よいのだ？")) return;
+  stats = {};
+  saveStats(stats);
+  renderStats();
+  rebuildSelectOptions();
+}
+</script>
+
+</body>
+</html>
