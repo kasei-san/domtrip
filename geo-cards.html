@@ -246,6 +246,8 @@ let idx = 0;
 let showingAnswer = false;
 let answeredThisCard = false;
 let fetchToken = 0;
+const wikiCache = new Map();
+const commonsCache = new Map();
 
 function buildDeck(mode) {
   if (mode === "__weak__") {
@@ -327,14 +329,24 @@ async function loadDetail(term, pref) {
   loadImages(term, pref, myToken, imgGrid, imgNote);
 
   try {
-    const res = await fetch(`https://ja.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(term)}`);
-    if (myToken !== fetchToken) return;
-    if (!res.ok) throw new Error("not found");
-    const data = await res.json();
+    let data = wikiCache.get(term);
+    if (!data) {
+      const res = await fetch(`https://ja.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(term)}`);
+      if (myToken !== fetchToken) return;
+      if (!res.ok) throw new Error("not found");
+      data = await res.json();
+      wikiCache.set(term, data);
+    }
     if (myToken !== fetchToken) return;
     loading.style.display = "none";
     extract.textContent = data.extract || "(概要が取得できなかったのだ)";
-    source.innerHTML = `出典: <a href="${data.content_urls?.desktop?.page || ''}" target="_blank" rel="noopener">Wikipedia「${data.title || term}」</a>`;
+    source.textContent = "出典: ";
+    const srcLink = document.createElement("a");
+    srcLink.href = data.content_urls?.desktop?.page || "#";
+    srcLink.target = "_blank";
+    srcLink.rel = "noopener";
+    srcLink.textContent = `Wikipedia「${data.title || term}」`;
+    source.appendChild(srcLink);
   } catch (e) {
     if (myToken !== fetchToken) return;
     loading.style.display = "none";
@@ -345,12 +357,17 @@ async function loadDetail(term, pref) {
 
 async function loadImages(term, pref, myToken, imgGrid, imgNote) {
   try {
-    const q = `${term} ${pref}`;
-    const url = `https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrnamespace=6&gsrsearch=${encodeURIComponent(q)}&gsrlimit=4&prop=imageinfo&iiprop=url|extmetadata&iiurlwidth=400`;
-    const res = await fetch(url);
-    if (myToken !== fetchToken) return;
-    if (!res.ok) throw new Error("commons fetch failed");
-    const data = await res.json();
+    const cacheKey = `${term}|${pref}`;
+    let data = commonsCache.get(cacheKey);
+    if (!data) {
+      const q = `${term} ${pref}`;
+      const url = `https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrnamespace=6&gsrsearch=${encodeURIComponent(q)}&gsrlimit=4&prop=imageinfo&iiprop=url|extmetadata&iiurlwidth=400`;
+      const res = await fetch(url);
+      if (myToken !== fetchToken) return;
+      if (!res.ok) throw new Error("commons fetch failed");
+      data = await res.json();
+      commonsCache.set(cacheKey, data);
+    }
     if (myToken !== fetchToken) return;
     const pages = data.query && data.query.pages ? Object.values(data.query.pages) : [];
     const withImages = pages
@@ -409,6 +426,7 @@ function shuffleCards() {
 
 const select = document.getElementById("regionSelect");
 function rebuildSelectOptions() {
+  const prevValue = select.value || "全部";
   const weakCount = ALL_CARDS.filter(c => {
     const s = statFor(c.id);
     return s.seen === 0 || wrongRate(s) > 0;
@@ -425,6 +443,7 @@ function rebuildSelectOptions() {
     opt.textContent = label;
     select.appendChild(opt);
   }
+  select.value = prevValue;
 }
 rebuildSelectOptions();
 select.addEventListener("change", () => buildDeck(select.value));
