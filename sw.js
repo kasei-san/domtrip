@@ -1,5 +1,5 @@
 // Service Worker: アプリ一式をキャッシュしてオフライン動作させる
-const CACHE = "domtrip-v11";
+const CACHE = "domtrip-v12";
 const ASSETS = [
   "./",
   "index.html",
@@ -8,6 +8,7 @@ const ASSETS = [
   "ox_data.js",
   "ox.webmanifest",
   "geo-cards.html",
+  "rule-cards.html",
   "app_data.js",
   "manifest.webmanifest",
   "icon.svg",
