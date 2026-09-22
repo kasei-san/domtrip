@@ -70,7 +70,7 @@ python3 -m http.server 8731   # → http://localhost:8731/index.html
 - `questions/_自動生成_要検証/` は初回一括生成の失敗版（捏造混入）で `.gitignore` 済み。**参照元にしない**
 
 ### アプリの挙動を決める定数は `index.html` 先頭
-`KEY`（storage key）・`SESSION_LIMIT`（1セッションの出題数、現在5）・`INTERVALS`（固定間隔SRS 1→3→7→16→35日）は `index.html` の `<script>` 冒頭にある。`app-spec.md` は初期設計書で一部が実装と乖離している（データ埋め込み方式・新規上限20等）。**挙動の正は `index.html`**。
+`KEY`（storage key）・`SESSION_LIMIT_OPTIONS`（1セッションの出題数の選択肢、既定5・5/10/20から画面上で選択可、選択値は `STATE.sessionLimit` として進捗JSONに保存）・`INTERVALS`（固定間隔SRS 1→3→7→16→35日）は `index.html` の `<script>` 冒頭にある。`app-spec.md` は初期設計書で一部が実装と乖離している（データ埋め込み方式・新規上限20等）。**挙動の正は `index.html`**。
 
 ### 指標の定義（ダッシュボード）
 **到達度**=正解した異なり札 ÷ 科目のカード総数 / **周回**=延べ回答 ÷ カード総数 / **正答率**=正答 ÷ 演習数。
