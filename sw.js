@@ -1,5 +1,5 @@
 // Service Worker: アプリ一式をキャッシュしてオフライン動作させる
-const CACHE = "domtrip-v19";
+const CACHE = "domtrip-v20";
 const ASSETS = [
   "./",
   "index.html",
