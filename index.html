@@ -98,8 +98,9 @@
 "use strict";
 const $ = (id)=>document.getElementById(id);
 const KEY = "domtrip_v1";
+// 1セッションの出題数（復習＋新規の合計）。SESSION_LIMIT_OPTIONS[0]が既定値
 const SESSION_LIMIT_OPTIONS = [5,10,20];
-function sessionLimit(){ return SESSION_LIMIT_OPTIONS.includes(STATE.sessionLimit) ? STATE.sessionLimit : 5; } // 1セッションの出題数（復習＋新規の合計）。既定5、5/10/20から選択可
+function sessionLimit(){ return SESSION_LIMIT_OPTIONS.includes(STATE.sessionLimit) ? STATE.sessionLimit : SESSION_LIMIT_OPTIONS[0]; }
 const INTERVALS = {1:1,2:3,3:7,4:16,5:35};
 const today = ()=> new Date().toISOString().slice(0,10);
 const addDays = (d,n)=>{ const t=new Date(d+"T00:00:00"); t.setDate(t.getDate()+n); return t.toISOString().slice(0,10); };
@@ -115,7 +116,7 @@ const YEARS = [...new Set(cards.map(c=>c.year))].sort((a,b)=>{
 let sessionMode=false;
 
 // ---------- 永続化（file:// 不可環境を考慮）----------
-let STATE = { cards:{}, daily:[], streak:0, lastStudied:null, sessionLimit:5 };
+let STATE = { cards:{}, daily:[], streak:0, lastStudied:null, sessionLimit:SESSION_LIMIT_OPTIONS[0] };
 function loadState(){
   try{ const raw=localStorage.getItem(KEY); if(raw) STATE=Object.assign(STATE,JSON.parse(raw)); }
   catch(e){ sessionMode=true; }
@@ -460,7 +461,7 @@ function doImportText(){ applyImport($("impText").value); }
 function applyImport(raw){
   let d; try{ d=JSON.parse(raw); }catch(e){ toast("JSONが壊れているのだ"); return; }
   if(!d || d.appId!=="domtrip-quiz" || !d.cards){ toast("形式が違うのだ"); return; }
-  STATE={ cards:d.cards||{}, daily:d.daily||[], streak:d.streak||0, lastStudied:d.lastStudied||null };
+  STATE={ cards:d.cards||{}, daily:d.daily||[], streak:d.streak||0, lastStudied:d.lastStudied||null, sessionLimit:STATE.sessionLimit };
   saveState(); toast("進捗を復元したのだ"); home();
 }
 
