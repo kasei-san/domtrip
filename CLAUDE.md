@@ -79,7 +79,7 @@ python3 -m http.server 8731   # → http://localhost:8731/index.html
 - リポジトリ `kasei-san/domtrip`（public）、Pages source = `main` / `(root)`。公開URLは <https://kasei-san.com/domtrip/>（`kasei-san.github.io/domtrip/` はリダイレクト）。
 - **ブランチ → PR → main へマージで数十秒後に自動デプロイ**（main への直接 push はしない）。
 - **キャッシュ更新チェックリスト**: 公開ページの見た目・挙動を変えたら、`sw.js` の `CACHE`（`domtrip-vN`）を上げ、**6つの HTML に埋め込まれたバージョン表示行も同じ版に揃える**。場所は `grep -n "ver\. " *.html` で探す（`index.html` / `dashboard.html` / `ox.html` / `cram-sheet.html` / `study-plan.html` / `app-spec.html`）。
-  - **`questions/*.md` の中身だけを変えて `app_data.js` を再ビルドした PR も対象**（`app_data.js` は `sw.js` の `ASSETS` に含まれるキャッシュ対象そのものなので、HTML/JSを一切触っていなくても CACHE を上げないと、既にインストール済みの端末には新データが届かない）。実際に #22 でこれを一度見落とし、科目3の4択が「対象問題なし」になった（2026-09-22、#23 で修正）。
+  - **`app_data.js` の中身が変わる PR は、変更元が `questions/*.md` でも `ox_data.js` でも常に対象**（HTML/JSを一切触っていなくても該当する）。`app_data.js` は `sw.js` の `ASSETS` に含まれるキャッシュ対象そのものなので、CACHE を上げないと既にインストール済みの端末には新データが届かない。実際に #22（questions/*.mdのみ変更）でこれを一度見落とし、科目3の4択が「対象問題なし」になった（2026-09-22に発生・同日 #23 で修正）。
 - `cram-sheet.html` / `study-plan.html` / `app-spec.html` は対応する md から pandoc で生成した HTML だが、**バージョン表示行は生成後に手で挿入されている**。再生成コマンドは記録されていないので、pandoc で作り直す場合はバージョン行を再挿入すること。
 - iOS は file:// だと localStorage 不可なので必ず https URL から使う。
 
