@@ -7,3 +7,5 @@ study-log/エクスポート/
 domtrip進捗_*.json
 # Python のキャッシュ
 __pycache__/
+# 誤答ログ（間違えた論点の記録。個人の学習データなので今後はコミットしない。過去の版は履歴に残る）
+study-log/誤答ログ.md
