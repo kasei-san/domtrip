@@ -9,7 +9,41 @@
   @media (prefers-color-scheme: dark) { :root { --bg: #14202b; --fg: #eee6d8; --panel: rgba(20,28,36,0.85); --muted: #a89b7d; } }
   html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--fg);
     font-family: -apple-system, "Hiragino Sans", "Yu Gothic", sans-serif; }
-  #map { position: fixed; inset: 0; }
+  #map { position: fixed; inset: 0; z-index: 1; }
+  .hud, .modes, #quiz, #label, footer { z-index: 4; }
+  /* ---- 演出: 正解は日の丸＋紙吹雪、不正解は暗転＋雨 ---- */
+  #fx { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0; transition: opacity .35s; }
+  body.win #fx { opacity: 1; background: #fffdf6; }
+  body.win #fx::before { content: ""; position: absolute; left: 50%; top: 55%; width: min(70vw, 70vh); aspect-ratio: 1;
+    border-radius: 50%; background: #d7000f; transform: translate(-50%, -50%); animation: sunPop .7s cubic-bezier(.2,1.6,.4,1), sunPulse 1.6s .7s ease-in-out infinite; }
+  body.lose #fx { opacity: 1; background: radial-gradient(ellipse at 50% 40%, #2a2f3a 0%, #07090d 75%); }
+  body.lose #fx::before { content: ""; position: absolute; inset: -40px; opacity: .35;
+    background: repeating-linear-gradient(100deg, transparent 0 22px, rgba(170,190,220,.5) 22px 23px, transparent 23px 60px);
+    animation: rain .35s linear infinite; }
+  body.win { --fg: #2b2620; --muted: #6b3a2a; --panel: rgba(255,255,255,0.9); }
+  body.lose { --fg: #9aa3b2; --muted: #6f7888; --panel: rgba(10,12,18,0.8); }
+  body.lose #map { filter: saturate(.25) brightness(.7); animation: shake .45s; }
+  #map { transition: filter .5s; }
+  #confetti { position: fixed; inset: 0; z-index: 3; pointer-events: none; }
+  #stamp { position: fixed; left: 50%; top: 50%; z-index: 5; pointer-events: none; white-space: nowrap;
+    font-family: "Shippori Mincho B1", "Hiragino Mincho ProN", "Yu Mincho", serif; font-weight: 800;
+    font-size: clamp(64px, 16vw, 180px); transform: translate(-50%, -50%) scale(0); opacity: 0; }
+  #stamp.win { color: #fff; -webkit-text-stroke: 6px #d7000f; paint-order: stroke fill; text-shadow: 0 8px 0 #a00010, 0 0 40px #ffd54a;
+    animation: stampIn 1.4s cubic-bezier(.2,1.8,.4,1) forwards; }
+  #stamp.lose { color: #8c95a5; font-size: clamp(48px, 11vw, 120px); text-shadow: 0 4px 18px #000;
+    animation: sink 1.8s ease-out forwards; }
+  @keyframes sunPop { from { transform: translate(-50%, -50%) scale(0); } to { transform: translate(-50%, -50%) scale(1); } }
+  @keyframes sunPulse { 50% { transform: translate(-50%, -50%) scale(1.06); } }
+  @keyframes rain { to { transform: translate(-12px, 60px); } }
+  @keyframes shake { 20% { transform: translateX(-14px); } 40% { transform: translateX(12px); } 60% { transform: translateX(-8px); } 80% { transform: translateX(5px); } }
+  @keyframes stampIn { 0% { transform: translate(-50%, -50%) scale(4) rotate(-12deg); opacity: 0; }
+    35% { transform: translate(-50%, -50%) scale(1) rotate(-6deg); opacity: 1; }
+    75% { transform: translate(-50%, -50%) scale(1.05) rotate(-6deg); opacity: 1; }
+    100% { transform: translate(-50%, -140%) scale(.5) rotate(-6deg); opacity: 0; } }
+  @keyframes sink { 0% { transform: translate(-50%, -80%) scale(1); opacity: 0; } 25% { opacity: 1; }
+    75% { transform: translate(-50%, -40%) scale(1); opacity: .9; } 100% { transform: translate(-50%, 20%) scale(.95); opacity: 0; } }
+  @keyframes slam { 0% { transform: scale(3); opacity: 0; filter: blur(8px); } 60% { transform: scale(.92); opacity: 1; filter: blur(0); }
+    80% { transform: scale(1.04); } 100% { transform: scale(1); } }
   .hud { position: fixed; left: 16px; top: 12px; right: 16px; pointer-events: none; }
   .hud h1 { margin: 0; font-size: 1.05em; }
   .hud .sub { font-size: 0.8em; color: var(--muted); }
@@ -21,15 +55,19 @@
   .modes button, #next { font: inherit; font-size: 0.85em; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--muted);
     background: var(--panel); color: var(--fg); cursor: pointer; }
   .modes button.on { background: #c9622a; border-color: #c9622a; color: #fff; }
-  #quiz { position: fixed; top: 56px; left: 50%; transform: translateX(-50%); width: min(420px, calc(100% - 32px));
+  #quiz { position: fixed; top: 56px; left: 50%; transform: translateX(-50%); width: min(560px, calc(100% - 32px));
     box-sizing: border-box; padding: 10px 16px; border-radius: 14px; background: var(--panel); text-align: center; }
-  #quiz .q { font-size: 1.6em; font-weight: bold; }
+  #quiz .q { font-family: "Shippori Mincho B1", "Hiragino Mincho ProN", "Yu Mincho", serif; font-weight: 800;
+    font-size: clamp(40px, 11vw, 76px); line-height: 1.15; letter-spacing: .04em; word-break: keep-all; overflow-wrap: anywhere; }
+  #quiz .q.slam { animation: slam .55s cubic-bezier(.2,1.4,.4,1); }
   #quiz .msg { font-size: 0.9em; color: var(--muted); min-height: 1.4em; }
   #quiz .msg.ok { color: #2e9b5a; font-weight: bold; } #quiz .msg.ng { color: #d0453a; font-weight: bold; }
   #quiz .row { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: 0.8em; color: var(--muted); }
   #next { visibility: hidden; background: #c9622a; border-color: #c9622a; color: #fff; font-weight: bold; }
   #err { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; padding: 16px; text-align: center; }
 </style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@800&display=swap">
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
@@ -38,7 +76,10 @@
 </script>
 </head>
 <body>
+<div id="fx"></div>
 <div id="map"></div>
+<canvas id="confetti"></canvas>
+<div id="stamp"></div>
 <div class="hud">
   <h1>3D日本地図</h1>
   <div class="sub" id="sub"></div>
@@ -282,6 +323,8 @@ function nextQuestion() {
   answered = false; selected = null; wrongPick = null;
   clearMarker(); refresh();
   $("qName").textContent = cur.name;
+  const q = $("qName"); q.classList.remove("slam"); void q.offsetWidth; q.classList.add("slam"); // 毎問アニメを出し直す
+  setFx(null);
   $("qMsg").className = "msg";
   $("qMsg").textContent = cur.points.length ? "この観光地がある都道府県を地図でタップ" : "この名物の都道府県を地図でタップ";
   $("next").style.visibility = "hidden";
@@ -297,9 +340,46 @@ function answer(g) {
   $("qMsg").textContent = ok ? `○ 正解！ ${cur.pref}${hint}` : `× ${g.userData.name}ではなく ${cur.pref}${hint}`;
   $("qScore").textContent = `${score[0]} / ${score[1]} 問正解`;
   $("next").style.visibility = "visible";
+  setFx(ok ? "win" : "lose");
   const reveal = () => { wrongPick = null; selected = target; blinkT = 0; showMarker(target, cur.points); refresh(); };
   if (ok) reveal();
   else { const no = qNo; wrongPick = g; refresh(); setTimeout(() => { if (no === qNo && mode === "quiz") reveal(); }, 700); }
+}
+// ---- 正解/不正解の演出 ----
+const hemi = scene.children.find((o) => o.isHemisphereLight);
+const cvs = $("confetti"), ctx = cvs.getContext("2d");
+let pieces = [];
+function setFx(kind) {
+  document.body.classList.toggle("win", kind === "win");
+  document.body.classList.toggle("lose", kind === "lose");
+  const st = $("stamp");
+  st.className = ""; void st.offsetWidth;
+  if (kind) { st.textContent = kind === "win" ? "正解！" : "ざんねん…"; st.className = kind; }
+  hemi.intensity = kind === "lose" ? 0.6 : kind === "win" ? 2.2 : 1.6;
+  sun.intensity = kind === "lose" ? 0.7 : 1.8;
+  pieces = kind === "win" ? burst() : [];
+}
+// 紅白と金の紙吹雪。画面中央下から打ち上げて、ひらひら落とす
+function burst() {
+  const w = innerWidth, h = innerHeight, colors = ["#d7000f", "#ffffff", "#f5c542", "#ff5c8a", "#ffe9a8"];
+  return Array.from({ length: 220 }, (_, i) => {
+    const fromSide = i % 3 ? (i % 2 ? 0 : w) : w / 2;
+    return { x: fromSide, y: h * (i % 3 ? 0.9 : 0.7), vx: (fromSide === 0 ? 1 : fromSide === w ? -1 : 0) * (4 + Math.random() * 10) + (Math.random() - .5) * 8,
+      vy: -(10 + Math.random() * 14), r: Math.random() * Math.PI, vr: (Math.random() - .5) * .4,
+      w: 6 + Math.random() * 8, h: 10 + Math.random() * 10, c: colors[i % colors.length], life: 0 };
+  });
+}
+function drawConfetti(dt) {
+  if (cvs.width !== innerWidth || cvs.height !== innerHeight) { cvs.width = innerWidth; cvs.height = innerHeight; }
+  ctx.clearRect(0, 0, cvs.width, cvs.height);
+  const f = dt * 60;
+  for (const p of pieces) {
+    p.life += dt; p.vy += 0.35 * f; p.vx *= Math.pow(0.985, f); p.vy = Math.min(p.vy, 3.2 + Math.sin(p.life * 6) * 1.5);
+    p.x += (p.vx + Math.sin(p.life * 4 + p.r) * 1.2) * f; p.y += p.vy * f; p.r += p.vr * f;
+    ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.scale(1, Math.cos(p.life * 8 + p.r));
+    ctx.fillStyle = p.c; ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); ctx.restore();
+  }
+  pieces = pieces.filter((p) => p.y < cvs.height + 40);
 }
 function setMode(m) {
   mode = m;
@@ -308,7 +388,7 @@ function setMode(m) {
   $("quiz").style.display = m === "quiz" ? "block" : "none";
   $("sub").textContent = m === "quiz" ? "ドラッグで回転・ホイール/ピンチで拡大"
     : "ドラッグで回転・ホイール/ピンチで拡大。都道府県をタップすると手前に飛び出す（もう一度タップで戻る）";
-  selected = null; wrongPick = null; clearMarker(); refresh();
+  selected = null; wrongPick = null; clearMarker(); refresh(); setFx(null);
   if (m === "quiz") nextQuestion();
 }
 $("mQuiz").onclick = () => setMode("quiz");
@@ -322,6 +402,7 @@ renderer.setAnimationLoop(() => {
   const dt = Math.min(clock.getDelta(), 0.1);
   animate(dt);
   blink(dt);
+  drawConfetti(dt);
   controls.update();
   renderer.render(scene, camera);
 });
