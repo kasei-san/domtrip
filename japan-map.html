@@ -62,8 +62,9 @@ el.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 500);
-const CENTER = new THREE.Vector3(-1, -1.5, 0);
-camera.position.set(CENTER.x, CENTER.y - 14, 26);
+const CENTER = new THREE.Vector3(-0.6, -1.5, 0);
+const VIEW_DIR = new THREE.Vector3(0, -14, 26).normalize(), BASE_DIST = Math.hypot(14, 26);
+camera.position.copy(CENTER).addScaledVector(VIEW_DIR, BASE_DIST);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.target.copy(CENTER);
 controls.enableDamping = true;
@@ -189,6 +190,10 @@ function resize() {
   renderer.setSize(w, h);
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
+  // 縦長画面でも沖縄の枠〜北海道の東端（幅約18＋余白）が収まるよう、画面比に応じてカメラを引く
+  const fit = 20 / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect);
+  camera.position.copy(CENTER).addScaledVector(VIEW_DIR, Math.max(BASE_DIST, fit * 1.05));
+  controls.update();
 }
 addEventListener("resize", resize);
 resize();
