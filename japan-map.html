@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3D日本地図</title>
+<style>
+  :root { color-scheme: light dark; --bg: #dfeaf2; --fg: #2b2620; --panel: rgba(255,255,255,0.85); --muted: #6b6252; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #14202b; --fg: #eee6d8; --panel: rgba(20,28,36,0.85); --muted: #a89b7d; } }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--fg);
+    font-family: -apple-system, "Hiragino Sans", "Yu Gothic", sans-serif; }
+  #map { position: fixed; inset: 0; }
+  .hud { position: fixed; left: 16px; top: 12px; right: 16px; pointer-events: none; }
+  .hud h1 { margin: 0; font-size: 1.05em; }
+  .hud .sub { font-size: 0.8em; color: var(--muted); }
+  #label { position: fixed; top: 64px; left: 50%; transform: translateX(-50%); padding: 6px 16px;
+    border-radius: 999px; background: var(--panel); font-weight: bold; font-size: 1.1em; display: none; pointer-events: none; }
+  footer { position: fixed; left: 16px; right: 16px; bottom: 8px; font-size: 0.72em; color: var(--muted); pointer-events: none; }
+  #err { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; padding: 16px; text-align: center; }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<div id="map"></div>
+<div class="hud">
+  <h1>3D日本地図</h1>
+  <div class="sub">ドラッグで回転・ホイール/ピンチで拡大。都道府県をタップすると手前に飛び出す（もう一度タップで戻る）</div>
+</div>
+<div id="label"></div>
+<div id="err">WebGL が使えないため表示できません。</div>
+<footer>出典: 地球地図日本（国土地理院）を加工して作成（<a href="https://github.com/dataofjapan/land" style="pointer-events:auto;color:inherit">dataofjapan/land</a>）。沖縄県は左上の枠内に移動、小笠原諸島などは省略。 ver. 2026-09-22 (v23)</footer>
+<script src="japan_geo.js"></script>
+<!-- three.js は CDN から読むのでこのページはオフラインでは動かない -->
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+const DEPTH = 0.22;
+const REGION_COLORS = {
+  "北海道": 0x7fb3d5, "東北": 0x76c7a0, "関東": 0xf2c46d, "中部": 0xa3d977,
+  "近畿": 0xf19c79, "中国": 0xc39bd3, "四国": 0x85c1c1, "九州・沖縄": 0xe8a0b4,
+};
+const GEO = window.JAPAN_GEO;
+const el = document.getElementById("map");
+const label = document.getElementById("label");
+
+let renderer;
+try {
+  if (!GEO) throw new Error("japan_geo.js が読み込めない");
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+} catch (e) {
+  document.getElementById("err").style.display = "flex";
+  throw e;
+}
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+el.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 500);
+const CENTER = new THREE.Vector3(-0.6, -1.5, 0);
+const VIEW_DIR = new THREE.Vector3(0, -14, 26).normalize(), BASE_DIST = Math.hypot(14, 26);
+camera.position.copy(CENTER).addScaledVector(VIEW_DIR, BASE_DIST);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.copy(CENTER);
+controls.enableDamping = true;
+controls.update();
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0x8899aa, 1.6));
+const sun = new THREE.DirectionalLight(0xffffff, 1.8);
+sun.position.set(-8, -10, 20);
+scene.add(sun);
+
+// 都道府県ごとに 1 Mesh。原点を外接矩形の中心に寄せておき、飛び出し時にその場で拡大・回転できるようにする
+const prefs = [];
+for (const p of GEO.prefectures) {
+  const shapes = [];
+  for (const rings of p.polygons) {
+    const shape = new THREE.Shape(rings[0].map(([x, y]) => new THREE.Vector2(x, y)));
+    for (const h of rings.slice(1)) shape.holes.push(new THREE.Path(h.map(([x, y]) => new THREE.Vector2(x, y))));
+    shapes.push(shape);
+  }
+  // 飛び出し時の中心・大きさは一番大きい島で測る（東京都の伊豆諸島などに引っ張られないように）
+  const outers = shapes.map((sh) => sh.getPoints());
+  const areas = outers.map((pts) => Math.abs(THREE.ShapeUtils.area(pts)));
+  const box = new THREE.Box2().setFromPoints(outers[areas.indexOf(Math.max(...areas))]);
+  const c = box.getCenter(new THREE.Vector2());
+  const geom = new THREE.ExtrudeGeometry(shapes, { depth: DEPTH, bevelEnabled: false });
+  geom.translate(-c.x, -c.y, 0);
+  // 同じ地方の中でも隣県を見分けられるよう、県コードで明度を少しずらす
+  const color = new THREE.Color(REGION_COLORS[p.region]).offsetHSL(0, 0, ((p.id * 7) % 5 - 2) * 0.035);
+  const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.75, metalness: 0.0 });
+  const mesh = new THREE.Mesh(geom, mat);
+
+  // 県境の線は上面の輪郭だけ引く（EdgesGeometry だと側面の縦線が大量に出る）
+  const pts = [];
+  for (const rings of p.polygons) for (const r of rings) {
+    for (let i = 0; i < r.length; i++) {
+      const a = r[i], b = r[(i + 1) % r.length];
+      pts.push(a[0] - c.x, a[1] - c.y, DEPTH + 0.002, b[0] - c.x, b[1] - c.y, DEPTH + 0.002);
+    }
+  }
+  const lineGeom = new THREE.BufferGeometry();
+  lineGeom.setAttribute("position", new THREE.Float32BufferAttribute(pts, 3));
+  const line = new THREE.LineSegments(lineGeom, new THREE.LineBasicMaterial({ color: 0x4a4038, transparent: true, opacity: 0.55 }));
+
+  const group = new THREE.Group();
+  group.add(mesh, line);
+  group.position.set(c.x, c.y, 0);
+  group.userData = { id: p.id, name: p.name, home: new THREE.Vector3(c.x, c.y, 0), size: Math.max(box.max.x - box.min.x, box.max.y - box.min.y) };
+  mesh.userData.group = group;
+  scene.add(group);
+  prefs.push({ group, mesh, color });
+}
+
+// 沖縄の枠（天気図の区切り）
+{
+  const [x0, y0, x1, y1] = GEO.okinawaInset;
+  const g = new THREE.BufferGeometry().setFromPoints([[x0, y0], [x1, y0], [x1, y1], [x0, y1], [x0, y0]].map(([x, y]) => new THREE.Vector3(x, y, 0.01)));
+  scene.add(new THREE.Line(g, new THREE.LineBasicMaterial({ color: 0x5a6b7a })));
+}
+
+// ---- 操作: ホバーで強調・タップで飛び出し ----
+const ray = new THREE.Raycaster();
+const ndc = new THREE.Vector2();
+const meshes = prefs.map((p) => p.mesh);
+let hovered = null, selected = null;
+function pick(ev) {
+  const r = renderer.domElement.getBoundingClientRect();
+  ndc.set(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  const hit = ray.intersectObjects(meshes, false)[0];
+  return hit ? hit.object.userData.group : null;
+}
+// 強調はホバー中と選択中の県だけ。選択を切り替えたときも呼んで前の県の強調とラベルを戻す
+function refresh() {
+  for (const { mesh } of prefs) {
+    const g = mesh.userData.group;
+    mesh.material.emissive.setHex(g === hovered || g === selected ? 0x333333 : 0x000000);
+  }
+  const show = selected || hovered;
+  label.style.display = show ? "block" : "none";
+  if (show) label.textContent = show.userData.name;
+}
+function setHover(g) {
+  if (hovered === g) return;
+  hovered = g;
+  refresh();
+}
+renderer.domElement.addEventListener("pointermove", (ev) => setHover(pick(ev)));
+let downAt = null;
+renderer.domElement.addEventListener("pointerdown", (ev) => { downAt = [ev.clientX, ev.clientY]; });
+renderer.domElement.addEventListener("pointerup", (ev) => {
+  if (!downAt || Math.hypot(ev.clientX - downAt[0], ev.clientY - downAt[1]) > 6) return; // ドラッグは無視
+  const g = pick(ev);
+  selected = (g && g !== selected) ? g : null;
+  hovered = g;
+  refresh();
+});
+
+// 飛び出し先: カメラ前方の一定距離。県の大きさに合わせて拡大率を決める
+const tmpPos = new THREE.Vector3(), tmpQuat = new THREE.Quaternion(), identity = new THREE.Quaternion();
+const tmpDir = new THREE.Vector3(), spinQuat = new THREE.Quaternion(), Y_AXIS = new THREE.Vector3(0, 1, 0), upAxis = new THREE.Vector3();
+const POP_SEC = 1.1, SPIN_TURNS = 2;
+const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+// 進み具合 t（0=地図上, 1=手前）を時間で動かし、途中は画面の縦軸まわりに回しながら寄せる
+function animate(dt) {
+  camera.getWorldDirection(tmpDir);
+  upAxis.copy(Y_AXIS).applyQuaternion(camera.quaternion);
+  for (const { group } of prefs) {
+    const u = group.userData;
+    const goal = group === selected ? 1 : 0;
+    if (u.t === undefined) u.t = 0;
+    if (u.t === goal && goal === 0) continue;
+    u.t = goal ? Math.min(1, u.t + dt / POP_SEC) : Math.max(0, u.t - dt / POP_SEC);
+    const e = easeInOut(u.t);
+    tmpPos.copy(camera.position).addScaledVector(tmpDir, 16);
+    group.position.lerpVectors(u.home, tmpPos, e);
+    group.scale.setScalar(1 + (3.2 / u.size - 1) * e);
+    tmpQuat.slerpQuaternions(identity, camera.quaternion, e);
+    spinQuat.setFromAxisAngle(upAxis, (1 - e) * SPIN_TURNS * Math.PI * 2);
+    group.quaternion.copy(spinQuat).multiply(tmpQuat);
+  }
+}
+
+function resize() {
+  const w = el.clientWidth, h = el.clientHeight;
+  renderer.setSize(w, h);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  // 縦長画面でも沖縄の枠〜北海道の東端（幅約18＋余白）が収まるよう、画面比に応じてカメラを引く
+  const fit = 20 / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect);
+  camera.position.copy(CENTER).addScaledVector(VIEW_DIR, Math.max(BASE_DIST, fit * 1.05));
+  controls.update();
+}
+addEventListener("resize", resize);
+resize();
+
+const clock = new THREE.Clock();
+renderer.setAnimationLoop(() => {
+  animate(Math.min(clock.getDelta(), 0.1));
+  controls.update();
+  renderer.render(scene, camera);
+});
+</script>
+</body>
+</html>
