@@ -33,6 +33,9 @@ python3 tools/build_app_data.py
 # ox-cards.md と cram-sheet.md の観光地理リスト → ox_data.js を再生成（1行暗記○×アプリ ox.html 用）
 python3 tools/build_ox_data.py
 
+# tools/src/japan.topojson → japan_geo.js を再生成（3D日本地図 japan-map.html 用。出典: 地球地図日本）
+python3 tools/build_japan_geo.py
+
 # ローカル確認（file:// では app_data.js 読込も localStorage も動かない）
 python3 -m http.server 8731   # → http://localhost:8731/index.html
 ```
