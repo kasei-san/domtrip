@@ -39,8 +39,9 @@
   #bigX { color: #ff1a1a; font-size: min(90vw, 90vh); line-height: 1; text-shadow: 0 0 60px #ff0000, 0 0 120px #800; }
   #bigX.on { animation: xSlam .9s cubic-bezier(.2,1.6,.4,1) forwards; }
   /* 正解の県名（特大） */
-  #prefBig { position: fixed; left: 50%; bottom: 64px; z-index: 5; pointer-events: none; white-space: nowrap; font-family: var(--display);
-    font-size: clamp(88px, 22vw, 300px); line-height: 1; transform: translateX(-50%); opacity: 0; }
+  #answerRow { position: fixed; left: 0; right: 0; bottom: 64px; z-index: 5; pointer-events: none;
+    display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 12px 28px; }
+  #prefBig { white-space: nowrap; font-family: var(--display); font-size: clamp(80px, 20vw, 280px); line-height: 1; opacity: 0; }
   #prefBig.win { opacity: 1; color: #ffd400; -webkit-text-stroke: 10px #b80012; paint-order: stroke fill;
     text-shadow: 0 12px 0 #6b000a, 0 0 50px #fff27a; animation: prefWin 1s .35s cubic-bezier(.2,1.8,.4,1) both, wobble 1.2s 1.4s ease-in-out infinite; }
   #prefBig.lose { opacity: 1; color: #c6ccd8; -webkit-text-stroke: 6px #10131a; paint-order: stroke fill;
@@ -53,8 +54,8 @@
   #photo.win { display: block; animation: photoIn .7s .5s cubic-bezier(.2,1.6,.4,1) both; }
   #photo.lose { display: block; animation: photoIn .7s 1.2s cubic-bezier(.2,1.6,.4,1) both; filter: grayscale(.6) brightness(.8); }
   @media (max-width: 700px) {
-    #photo { width: 44vw; top: auto; bottom: calc(64px + 24vw); right: 10px; }
-    #prefBig { bottom: 52px; }
+    #photo { width: 44vw; top: auto; bottom: calc(52px + 20vw + 110px); right: 10px; }
+    #answerRow { bottom: 52px; }
   }
   @keyframes spin { to { transform: rotate(360deg); } }
   @keyframes raysIn { from { opacity: 0; transform: scale(.3) rotate(-60deg); } }
@@ -73,11 +74,11 @@
   @keyframes xSlam { 0% { transform: translate(-50%, -50%) scale(4) rotate(30deg); opacity: 0; }
     25% { transform: translate(-50%, -50%) scale(.9) rotate(0); opacity: 1; } 35% { transform: translate(-50%, -50%) scale(1.05); }
     70% { transform: translate(-50%, -50%) scale(1); opacity: .9; } 100% { transform: translate(-50%, -50%) scale(1.6); opacity: 0; } }
-  @keyframes prefWin { 0% { transform: translateX(-50%) translateY(120%) scale(.2) rotate(-20deg); } 100% { transform: translateX(-50%) scale(1) rotate(-3deg); } }
-  @keyframes wobble { 50% { transform: translateX(-50%) scale(1.08) rotate(3deg); } 0%,100% { transform: translateX(-50%) scale(1) rotate(-3deg); } }
-  @keyframes prefLose { 0% { transform: translateX(-50%) translateY(-60vh); filter: blur(10px); } 70% { transform: translateX(-50%) translateY(6%); filter: blur(0); }
-    100% { transform: translateX(-50%); } }
-  @keyframes droop { 50% { transform: translateX(-50%) translateY(10px) skewX(-4deg); } }
+  @keyframes prefWin { 0% { transform: translateY(120%) scale(.2) rotate(-20deg); } 100% { transform: scale(1) rotate(-3deg); } }
+  @keyframes wobble { 50% { transform: scale(1.08) rotate(3deg); } 0%,100% { transform: scale(1) rotate(-3deg); } }
+  @keyframes prefLose { 0% { transform: translateY(-60vh); filter: blur(10px); } 70% { transform: translateY(6%); filter: blur(0); }
+    100% { transform: none; } }
+  @keyframes droop { 50% { transform: translateY(10px) skewX(-4deg); } }
   @keyframes photoIn { 0% { transform: translateY(-50%) translateX(140%) rotate(40deg); } 100% { transform: translateY(-50%) rotate(4deg); } }
   @media (max-width: 700px) { @keyframes photoIn { 0% { transform: translateX(140%) rotate(40deg); } 100% { transform: rotate(4deg); } } }
   @keyframes slam { 0% { transform: scale(3); opacity: 0; filter: blur(8px); } 60% { transform: scale(.92); opacity: 1; filter: blur(0); }
@@ -112,7 +113,7 @@
     border-radius: 999px; background: var(--panel); font-weight: bold; font-size: 1.1em; display: none; pointer-events: none; }
   footer { position: fixed; left: 16px; right: 16px; bottom: 8px; font-size: 0.72em; color: var(--muted); pointer-events: none; }
   .modes { position: fixed; top: 10px; right: 16px; display: flex; gap: 6px; }
-  .modes button, #next { font: inherit; font-size: 0.85em; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--muted);
+  .modes button { font: inherit; font-size: 0.85em; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--muted);
     background: var(--panel); color: var(--fg); cursor: pointer; }
   .modes button.on { background: #c9622a; border-color: #c9622a; color: #fff; }
   #quiz { position: fixed; top: 56px; left: 50%; transform: translateX(-50%); width: min(980px, calc(100% - 24px));
@@ -123,7 +124,17 @@
   #quiz .msg { font-size: 0.9em; color: var(--muted); min-height: 1.4em; }
   #quiz .msg.ok { color: #2e9b5a; font-weight: bold; } #quiz .msg.ng { color: #d0453a; font-weight: bold; }
   #quiz .row { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: 0.8em; color: var(--muted); }
-  #next { visibility: hidden; background: #c9622a; border-color: #c9622a; color: #fff; font-weight: bold; }
+  #next { visibility: hidden; pointer-events: auto; font-family: var(--display); font-size: clamp(30px, 5.5vw, 72px); padding: .25em .8em;
+    border-radius: 999px; border: 5px solid #fff; background: #ff3b1f; color: #fff; cursor: pointer;
+    box-shadow: 0 8px 0 #8a1200, 0 0 30px rgba(255,80,0,.8); animation: nextPulse .8s ease-in-out infinite; }
+  #next:active { transform: translateY(6px); box-shadow: 0 2px 0 #8a1200; }
+  @keyframes nextPulse { 50% { scale: 1.08; } }
+  /* カードは地図（北海道など）に重なるので、クリックは下の地図へ通す */
+  #quiz { pointer-events: none; }
+  #quiz { background: transparent; padding-top: 0; }
+  #quiz .q { color: #fff; -webkit-text-stroke: 8px #1a1410; paint-order: stroke fill; text-shadow: 0 6px 0 rgba(0,0,0,.35); }
+  #quiz .msg, #quiz .row { text-shadow: 0 0 4px var(--bg), 0 0 8px var(--bg); }
+  body.win #quiz .msg, body.win #quiz .row { text-shadow: 0 0 3px #fff, 0 0 6px #fff, 0 0 10px #fff; }
   #err { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; padding: 16px; text-align: center; }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -145,7 +156,7 @@
 <div id="timer"><span id="tSec">10.00</span><small>秒</small></div>
 <div id="stamp"></div>
 <div id="bigX">×</div>
-<div id="prefBig"></div>
+<div id="answerRow"><div id="prefBig"></div><button id="next">次へ ▶</button></div>
 <figure id="photo" style="margin:0"><img id="photoImg" alt=""><figcaption>写真: <a id="photoSrc" target="_blank" rel="noopener"></a>（Wikipedia）</figcaption></figure>
 <div class="hud">
   <h1>3D日本地図</h1>
@@ -155,7 +166,7 @@
 <div id="quiz">
   <div class="q" id="qName"></div>
   <div class="msg" id="qMsg"></div>
-  <div class="row"><span id="qScore"></span><button id="next">次へ ▶</button></div>
+  <div class="row"><span id="qScore"></span></div>
 </div>
 <div id="label"></div>
 <div id="err">WebGL が使えないため表示できません。</div>
@@ -189,8 +200,9 @@ el.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 500);
-const CENTER = new THREE.Vector3(-0.6, -1.5, 0);
-const VIEW_DIR = new THREE.Vector3(0, -14, 26).normalize(), BASE_DIST = Math.hypot(14, 26);
+// 上の問題カードに北海道が隠れないよう、注視点を上げて地図を画面の下寄りに置く
+const CENTER = new THREE.Vector3(-0.6, 1.6, 0);
+const VIEW_DIR = new THREE.Vector3(0, -14, 26).normalize(), BASE_DIST = Math.hypot(14, 26) * 1.22;
 camera.position.copy(CENTER).addScaledVector(VIEW_DIR, BASE_DIST);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.target.copy(CENTER);
