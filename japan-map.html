@@ -112,7 +112,7 @@ for (const p of GEO.prefectures) {
   geom.translate(-c.x, -c.y, 0);
   // 同じ地方の中でも隣県を見分けられるよう、県コードで明度を少しずらす
   const color = new THREE.Color(REGION_COLORS[p.region]).offsetHSL(0, 0, ((p.id * 7) % 5 - 2) * 0.035);
-  const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.75, metalness: 0.0, transparent: true });
+  const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.75, metalness: 0.0 });
   const mesh = new THREE.Mesh(geom, mat);
 
   // 県境の線は上面の輪郭だけ引く（EdgesGeometry だと側面の縦線が大量に出る）
@@ -135,7 +135,7 @@ for (const p of GEO.prefectures) {
   group.userData = { id: p.id, name: p.name, home: new THREE.Vector3(c.x, c.y, 0), box, size, focus: new THREE.Vector3(), popSize: size };
   mesh.userData.group = group;
   scene.add(group);
-  prefs.push({ group, mesh, color });
+  prefs.push({ group, mesh, line, color });
 }
 const prefById = Object.fromEntries(prefs.map((p) => [p.group.userData.id, p]));
 
@@ -161,12 +161,12 @@ function pick(ev) {
 // 強調はホバー中と選択中の県だけ。選択を切り替えたときも呼んで前の県の強調とラベルを戻す
 // 飛び出している間はほかの県を薄くして、手前の県を見分けやすくする
 function refresh() {
-  for (const { mesh, group: g } of prefs) {
-    mesh.material.emissive.setHex(g === wrongPick ? 0x802018 : g === hovered || g === selected ? 0x333333 : 0x000000);
-    const dim = selected && g !== selected;
-    mesh.material.opacity = dim ? 0.25 : 1;
-    mesh.material.depthWrite = !dim;
-    g.children[1].material.opacity = dim ? 0.15 : 0.55;
+  for (const { mesh, line, group: g } of prefs) {
+    const m = mesh.material, dim = !!selected && g !== selected;
+    m.emissive.setHex(g === wrongPick ? 0x802018 : g === hovered || g === selected ? 0x333333 : 0x000000);
+    if (m.transparent !== dim) { m.transparent = dim; m.depthWrite = !dim; m.needsUpdate = true; } // 半透明は薄くする間だけ
+    m.opacity = dim ? 0.25 : 1;
+    line.material.opacity = dim ? 0.15 : 0.55;
   }
   const show = selected || hovered;
   label.style.display = show ? "block" : "none";
@@ -231,7 +231,7 @@ resize();
 // ---- 観光地当てクイズ: 地名が出る → 県をタップ → 正解の県が飛び出して観光地が点滅 ----
 const QUIZ = window.GEO_QUIZ || [];
 const $ = (id) => document.getElementById(id);
-let mode = "quiz", queue = [], cur = null, answered = false, score = [0, 0], marker = null, blinkT = 0;
+let mode = "quiz", queue = [], cur = null, qNo = 0, answered = false, score = [0, 0], marker = null, blinkT = 0;
 const markerMat = new THREE.MeshBasicMaterial({ color: 0xff3b30, transparent: true });
 const ringMat = new THREE.MeshBasicMaterial({ color: 0xff3b30, transparent: true, side: THREE.DoubleSide });
 function shuffle(a) {
@@ -239,7 +239,7 @@ function shuffle(a) {
   return a;
 }
 function clearMarker() {
-  if (marker) marker.parent.remove(marker);
+  if (marker) { marker.parent.remove(marker); marker.traverse((o) => o.geometry && o.geometry.dispose()); }
   marker = null;
   for (const { group } of prefs) { group.userData.focus.set(0, 0, 0); group.userData.popSize = group.userData.size; }
 }
@@ -277,6 +277,7 @@ function nextQuestion() {
   if (!queue.length) queue = shuffle(QUIZ.slice());
   if (queue.length > 1 && cur && queue[queue.length - 1] === cur) queue.unshift(queue.pop()); // 同じ問題の連続を避ける
   cur = queue.pop();
+  qNo++;
   answered = false; selected = null; wrongPick = null;
   clearMarker(); refresh();
   $("qName").textContent = cur.name;
@@ -297,7 +298,7 @@ function answer(g) {
   $("next").style.visibility = "visible";
   const reveal = () => { wrongPick = null; selected = target; blinkT = 0; showMarker(target, cur.points); refresh(); };
   if (ok) reveal();
-  else { wrongPick = g; refresh(); setTimeout(() => { if (answered && wrongPick === g) reveal(); }, 700); }
+  else { const no = qNo; wrongPick = g; refresh(); setTimeout(() => { if (no === qNo && mode === "quiz") reveal(); }, 700); }
 }
 function setMode(m) {
   mode = m;
@@ -312,7 +313,7 @@ function setMode(m) {
 $("mQuiz").onclick = () => setMode("quiz");
 $("mMap").onclick = () => setMode("map");
 $("next").onclick = () => nextQuestion();
-addEventListener("keydown", (e) => { if (mode === "quiz" && answered && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); nextQuestion(); } });
+addEventListener("keydown", (e) => { if (e.target.tagName !== "BUTTON" && mode === "quiz" && answered && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); nextQuestion(); } });
 setMode("quiz");
 
 const clock = new THREE.Clock();

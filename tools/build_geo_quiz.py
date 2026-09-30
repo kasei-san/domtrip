@@ -24,10 +24,12 @@ NEAR_DEG = 0.05  # 県の輪郭からこれ以内なら可（小島は地図デ�
 def load_spots():
     spots = {}
     with io.open(SPOTS_TSV, encoding="utf-8") as f:
-        for ln in f:
-            ln = ln.rstrip("\n")
+        for no, ln in enumerate(f, 1):
+            ln = ln.strip()
             if not ln or ln.startswith("#"):
                 continue
+            if ln.count("\t") != 1:
+                sys.exit(f"geo_spots.tsv {no}行目: 「項目名<TAB>座標」の形になっていない")
             name, coords = ln.split("\t")
             pts = [] if coords == "-" else [tuple(map(float, c.split(","))) for c in coords.split(";")]
             spots[name] = pts
@@ -36,7 +38,8 @@ def load_spots():
 
 def load_outlines():
     """県ごとの外周リング（経緯度・島を省かない）。"""
-    topo = json.load(open(jg.SRC, encoding="utf-8"))
+    with open(jg.SRC, encoding="utf-8") as f:
+        topo = json.load(f)
     arcs = jg.decode_arcs(topo)
     out = {}
     for g in topo["objects"]["japan"]["geometries"]:
@@ -69,7 +72,7 @@ def dist(pt, ring):
 def main():
     spots = load_spots()
     outlines = load_outlines()
-    items, errors, near = [], [], []
+    items, errors, near, used = [], [], [], set()
     for _region, prefs in parse_geo():
         for pref, places in prefs:
             full = pref_label(pref)
@@ -78,6 +81,7 @@ def main():
                 if place not in spots:
                     errors.append(f"{place}: geo_spots.tsv に座標がない")
                     continue
+                used.add(place)
                 pts = []
                 for lat, lon in spots[place]:
                     p = (lon, lat)
@@ -103,7 +107,8 @@ def main():
         f.write("// 自動生成: python3 tools/build_geo_quiz.py（手で編集しない。座標は tools/src/geo_spots.tsv）\n")
         f.write("window.GEO_QUIZ = " + json.dumps(items, ensure_ascii=False, separators=(",", ":")) + ";\n")
     print(json.dumps({"items": len(items), "withPoints": sum(1 for i in items if i["points"]),
-                      "noPoints": [i["name"] for i in items if not i["points"]], "nearEdge": near}, ensure_ascii=False))
+                      "noPoints": [i["name"] for i in items if not i["points"]], "nearEdge": near,
+                      "unusedSpots": sorted(set(spots) - used)}, ensure_ascii=False))
 
 
 if __name__ == "__main__":
