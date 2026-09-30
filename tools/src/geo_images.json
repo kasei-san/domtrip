@@ -1,0 +1,710 @@
+{
+ "屈斜路湖（最大カルデラ湖）": {
+  "title": "屈斜路湖",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ec/Lake_Kussharoko_Bihoro_pass.jpg/960px-Lake_Kussharoko_Bihoro_pass.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "支笏湖": {
+  "title": "支笏湖",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fe/Lake_Shikotsu_Mt_Eniwa-dake03n4272.jpg/960px-Lake_Shikotsu_Mt_Eniwa-dake03n4272.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "羊ヶ丘展望台": {
+  "title": "さっぽろ羊ヶ丘展望台",
+  "thumb": null
+ },
+ "定山渓・登別温泉": {
+  "title": "定山渓",
+  "thumb": "https://upload.wikimedia.org/wikipedia/commons/1/1f/JozankeiOnsen2004-12.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+ },
+ "オシンコシンの滝（知床）": {
+  "title": "オシンコシンの滝",
+  "thumb": "https://upload.wikimedia.org/wikipedia/commons/c/c0/Waterfall_of_Oshinkoshin_03.JPG?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+ },
+ "積丹半島・神威岬": {
+  "title": "神威岬",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fc/130823_Cape_Kamui_Shakotan_Hokkaido_Japan01s3.jpg/960px-130823_Cape_Kamui_Shakotan_Hokkaido_Japan01s3.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "奥入瀬渓流": {
+  "title": "奥入瀬渓流",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/63/Oirase-keiryu.jpg/960px-Oirase-keiryu.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "三内丸山遺跡": {
+  "title": "三内丸山遺跡",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1d/140913_Sannai-Maruyama_site_Aomori_Japan01bs6bs6.jpg/960px-140913_Sannai-Maruyama_site_Aomori_Japan01bs6bs6.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "弘前城": {
+  "title": "弘前城",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f3/Hirosaki-castle_Aomori_with_Sakura_blossoms.jpg/960px-Hirosaki-castle_Aomori_with_Sakura_blossoms.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "浅虫温泉": {
+  "title": "浅虫温泉",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/04/Asamushi_Onsen_-Yanagi_no_yu.jpg/960px-Asamushi_Onsen_-Yanagi_no_yu.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "龍泉洞": {
+  "title": "龍泉洞",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/90/Jap-iwate-RYUSENDO.JPG/960px-Jap-iwate-RYUSENDO.JPG?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "猊鼻渓": {
+  "title": "猊鼻渓",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8f/230729_Geibikei_Ichinoseki_Iwate_pref_Japan22s3.jpg/960px-230729_Geibikei_Ichinoseki_Iwate_pref_Japan22s3.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "わんこそば": {
+  "title": "わんこそば",
+  "thumb": "https://upload.wikimedia.org/wikipedia/commons/e/e5/Wanko_soba2013.JPG?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+ },
+ "小岩井農場": {
+  "title": "小岩井農場",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bb/Fields_in_Koiwai_Farm.jpg/960px-Fields_in_Koiwai_Farm.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "遠野（民話）": {
+  "title": "遠野市",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2c/Kappa-buchi03s3872.jpg/960px-Kappa-buchi03s3872.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "瑞巌寺・松島": {
+  "title": "瑞巌寺",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fd/211030_Zuigan-ji_Matsushima_Miyagi_pref_Japan11s3.jpg/960px-211030_Zuigan-ji_Matsushima_Miyagi_pref_Japan11s3.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "作並温泉": {
+  "title": "作並温泉",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d1/SakunamiOnsen2007-11%2C.jpg/960px-SakunamiOnsen2007-11%2C.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "竿燈まつり": {
+  "title": "竿燈",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/66/Kan_h03.jpg/960px-Kan_h03.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "きりたんぽ": {
+  "title": "きりたんぽ",
+  "thumb": "https://upload.wikimedia.org/wikipedia/commons/0/09/Kiritanpo.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+ },
+ "田沢湖": {
+  "title": "田沢湖",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/43/Lake_Tazawa_and_Kansa-g%C5%AB_20210213.jpg/960px-Lake_Tazawa_and_Kansa-g%C5%AB_20210213.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "後生掛温泉": {
+  "title": "後生掛温泉",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/65/Gosyogake_Onsen_Genkan.jpg/960px-Gosyogake_Onsen_Genkan.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "いぶりがっこ": {
+  "title": "いぶり漬け",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/95/Iburigakko_sliced.jpg/960px-Iburigakko_sliced.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "銀山温泉": {
+  "title": "銀山温泉",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0b/Evening_twilight_in_Ginzan_Onsen_town_January_2022_A.jpg/960px-Evening_twilight_in_Ginzan_Onsen_town_January_2022_A.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "花笠まつり": {
+  "title": "山形花笠まつり",
+  "thumb": null
+ },
+ "かみのやま温泉": {
+  "title": "上山温泉",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/90/Meigetsu-so.JPG/960px-Meigetsu-so.JPG?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "致道館": {
+  "title": "庄内藩校致道館",
+  "thumb": null
+ },
+ "大内宿": {
+  "title": "大内宿",
+  "thumb": "https://upload.wikimedia.org/wikipedia/commons/6/61/Ja-fukushima-ohuchijuku-4.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+ },
+ "五色沼": {
+  "title": "五色沼湖沼群",
+  "thumb": null
+ },
+ "会津": {
+  "title": "若松城",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e6/%E8%8B%A5%E6%9D%BE%E5%9F%8E%EF%BC%88%E9%B6%B4%E3%83%B6%E5%9F%8E%EF%BC%8920220917-P1003471.jpg/960px-%E8%8B%A5%E6%9D%BE%E5%9F%8E%EF%BC%88%E9%B6%B4%E3%83%B6%E5%9F%8E%EF%BC%8920220917-P1003471.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "東山温泉": {
+  "title": "東山温泉",
+  "thumb": "https://upload.wikimedia.org/wikipedia/commons/a/ae/Higashiyama_Onsen_01.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+ },
+ "偕楽園（好文亭）": {
+  "title": "偕楽園",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ec/Kairaku-en%2C_Ibaraki_24.jpg/960px-Kairaku-en%2C_Ibaraki_24.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "袋田の滝": {
+  "title": "袋田の滝",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/da/Fukuroda_Falls_38.jpg/960px-Fukuroda_Falls_38.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "日光東照宮": {
+  "title": "日光東照宮",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b5/Nikko_Toshogu_Yomeimon_Gate_2024.jpg/960px-Nikko_Toshogu_Yomeimon_Gate_2024.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "華厳ノ滝": {
+  "title": "華厳滝",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/15/Kegon_Taki.jpg/960px-Kegon_Taki.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "いろは坂": {
+  "title": "いろは坂",
+  "thumb": null
+ },
+ "足利学校": {
+  "title": "足利学校",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e8/Ashikaga_Ashikaga-School_School_Gate_2.JPG/960px-Ashikaga_Ashikaga-School_School_Gate_2.JPG?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "しもつかれ": {
+  "title": "しもつかれ",
+  "thumb": "https://upload.wikimedia.org/wikipedia/commons/d/d1/%E3%81%97%E3%82%82%E3%81%A4%E3%81%8B%E3%82%8C.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+ },
+ "吹割の滝": {
+  "title": "吹割の滝",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/81/Fukiware_Falls_05.jpg/960px-Fukiware_Falls_05.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "伊香保温泉": {
+  "title": "伊香保温泉",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/82/Ikaho_Onsen_03.jpg/960px-Ikaho_Onsen_03.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "草津温泉": {
+  "title": "草津温泉",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6b/Yubatake_%28Kusatsu_Onsen%29.jpg/960px-Yubatake_%28Kusatsu_Onsen%29.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "鬼押出し": {
+  "title": "鬼押出し園",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/58/Mt.Asama_06.jpg/960px-Mt.Asama_06.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "分福茶釜（茂林寺）": {
+  "title": "分福茶釜",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/02/Japanesefairytalse01no16thom0025crop.jpg/960px-Japanesefairytalse01no16thom0025crop.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "長瀞（岩畳）": {
+  "title": "長瀞",
+  "thumb": null
+ },
+ "渋沢栄一記念館": {
+  "title": "渋沢栄一記念館",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/52/Eiichi_Shibusawa_Memorial_Museum.JPG/960px-Eiichi_Shibusawa_Memorial_Museum.JPG?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "鶴岡八幡宮": {
+  "title": "鶴岡八幡宮",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d1/TsurugaokaHachimangu_by_ulysses_powers_in_Kamakura.jpg/960px-TsurugaokaHachimangu_by_ulysses_powers_in_Kamakura.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "猿島": {
+  "title": "猿島",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/91/Sarushima_%28Yokosuka%29.jpg/960px-Sarushima_%28Yokosuka%29.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "三嶋大社": {
+  "title": "三嶋大社",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b6/Mishima-taisha_shaden.JPG/960px-Mishima-taisha_shaden.JPG?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "登呂遺跡": {
+  "title": "登呂遺跡",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/51/Toro_Site%2C_enkei.jpg/960px-Toro_Site%2C_enkei.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "三保松原": {
+  "title": "三保の松原",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2a/%E4%B8%89%E4%BF%9D%E3%81%AE%E6%9D%BE%E5%8E%9F%2C_Miho_no_matsubara_-_panoramio.jpg/960px-%E4%B8%89%E4%BF%9D%E3%81%AE%E6%9D%BE%E5%8E%9F%2C_Miho_no_matsubara_-_panoramio.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "浜名湖": {
+  "title": "浜名湖",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a5/Lake_Hamana_Aerial_photograph.2006.jpg/960px-Lake_Hamana_Aerial_photograph.2006.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "浄蓮の滝": {
+  "title": "浄蓮の滝",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fc/Joren_Falls_2011-02-26.jpg/960px-Joren_Falls_2011-02-26.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "善光寺": {
+  "title": "善光寺",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e1/Zenkoji_Temple_Hondo.jpg/960px-Zenkoji_Temple_Hondo.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "松本城": {
+  "title": "松本城",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4c/Matsumoto_Castle_1-1.jpg/960px-Matsumoto_Castle_1-1.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "御柱祭（諏訪大社）": {
+  "title": "御柱祭",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/74/Suwataisya_kamisya_kawagoshi.JPG/960px-Suwataisya_kamisya_kawagoshi.JPG?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "妻籠・奈良井宿": {
+  "title": "妻籠宿",
+  "thumb": "https://upload.wikimedia.org/wikipedia/commons/7/78/Kisokaido42_Tsumago.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+ },
+ "寝覚の床": {
+  "title": "寝覚の床",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f9/Nezame_no_toko_2.jpg/960px-Nezame_no_toko_2.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "身延山久遠寺": {
+  "title": "久遠寺",
+  "thumb": "https://upload.wikimedia.org/wikipedia/commons/a/af/Kuonji-temple-Hondou.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+ },
+ "忍野八海": {
+  "title": "忍野八海",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/22/231028_Waku-ike_Oshino_Hakkai_springs_Oshino_Yamanashi_pref_Japan01s3.jpg/960px-231028_Waku-ike_Oshino_Hakkai_springs_Oshino_Yamanashi_pref_Japan01s3.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "ほうとう": {
+  "title": "ほうとう",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a0/Houtou.jpg/960px-Houtou.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "御岳昇仙峡": {
+  "title": "昇仙峡",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cc/Kakuenpou_in_autumn.jpg/960px-Kakuenpou_in_autumn.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "ます寿し": {
+  "title": "鱒寿司",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cf/%E7%AC%B9%E3%81%94%E3%81%A8%E5%88%87%E3%81%A3%E3%81%9F%E3%81%BE%E3%81%99%E5%AF%BF%E3%81%97.JPG/960px-%E7%AC%B9%E3%81%94%E3%81%A8%E5%88%87%E3%81%A3%E3%81%9F%E3%81%BE%E3%81%99%E5%AF%BF%E3%81%97.JPG?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "宇奈月温泉": {
+  "title": "宇奈月温泉",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e7/Unaduki_Onsens.jpg/960px-Unaduki_Onsens.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "雨晴海岸": {
+  "title": "雨晴海岸",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8c/Himi-line-amaharashi.jpg/960px-Himi-line-amaharashi.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "兼六園": {
+  "title": "兼六園",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fc/Kenrokuen10-r.jpg/960px-Kenrokuen10-r.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "和倉温泉": {
+  "title": "和倉温泉",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/Wakura_Onsen_Kagaya_200906-2.jpg/960px-Wakura_Onsen_Kagaya_200906-2.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "九谷焼": {
+  "title": "九谷焼",
+  "thumb": "https://upload.wikimedia.org/wikipedia/commons/4/4f/KUTANI_Ewer.JPG?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+ },
+ "青柏祭": {
+  "title": "青柏祭",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f9/Dekayama.JPG/960px-Dekayama.JPG?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "永平寺": {
+  "title": "永平寺",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d1/Eihei-ji_Temple_Chokushimon%2C_Eiheiji-cho_2013.jpg/960px-Eihei-ji_Temple_Chokushimon%2C_Eiheiji-cho_2013.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "東尋坊": {
+  "title": "東尋坊",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/18/081101_Tojinbo_Sakai_Fukui_pref_Japan02bs10.jpg/960px-081101_Tojinbo_Sakai_Fukui_pref_Japan02bs10.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "気比の松原": {
+  "title": "気比松原",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a6/150228_Kehi-matsubara_Tsuruga_Fukui_prefecture_Japan02s3.jpg/960px-150228_Kehi-matsubara_Tsuruga_Fukui_prefecture_Japan02s3.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "あわら温泉": {
+  "title": "芦原温泉",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0f/Tsuruya_Awara_ac_%282%29.jpg/960px-Tsuruya_Awara_ac_%282%29.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "白川郷": {
+  "title": "白川郷",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a2/Shirakawa-go_%282017-07-22%29.jpg/960px-Shirakawa-go_%282017-07-22%29.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "郡上おどり": {
+  "title": "郡上おどり",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ed/Gujo_odori_2009-08-16.jpg/960px-Gujo_odori_2009-08-16.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "新穂高温泉": {
+  "title": "新穂高温泉",
+  "thumb": "https://upload.wikimedia.org/wikipedia/commons/6/68/ShinHodaka-no-Yu.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+ },
+ "恵那峡": {
+  "title": "恵那峡",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a9/Enakyo.jpg/960px-Enakyo.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "犬山城": {
+  "title": "犬山城",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4d/Inuyama_Castle_%281%29%2C_Kitakoken_Inuyama_Inuyama_City_2023.jpg/960px-Inuyama_Castle_%281%29%2C_Kitakoken_Inuyama_Inuyama_City_2023.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "豊川稲荷": {
+  "title": "豊川稲荷",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b4/Toyokawainari_honden.jpg/960px-Toyokawainari_honden.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "常滑焼": {
+  "title": "常滑焼",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/48/Yakimonosanpomichi2.JPG/960px-Yakimonosanpomichi2.JPG?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "熱田神宮": {
+  "title": "熱田神宮",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/71/Atsuta-jingu_Shrine_Haiden%2C_Jingu_Atsuta_Ward_Nagoya_2023.jpg/960px-Atsuta-jingu_Shrine_Haiden%2C_Jingu_Atsuta_Ward_Nagoya_2023.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "伊勢志摩": {
+  "title": "伊勢神宮",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e3/Naiku_001.jpg/960px-Naiku_001.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "二見浦": {
+  "title": "夫婦岩",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cb/Hiroshige%2C_Futamigaura_in_Ise_Province%2C_1858.jpg/960px-Hiroshige%2C_Futamigaura_in_Ise_Province%2C_1858.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "伊勢うどん": {
+  "title": "伊勢うどん",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/30/Ise_Udon_by_Kinoko.JPG/960px-Ise_Udon_by_Kinoko.JPG?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "彦根城": {
+  "title": "彦根城",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9f/Hikone_Castle_November_2016_-02.jpg/960px-Hikone_Castle_November_2016_-02.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "鮒ずし": {
+  "title": "鮒寿司",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7b/Funazushi_%E9%AE%92%E5%AF%BF%E5%8F%B8_Maibara_City_Shiga_Japan_2022-10-06.jpg/960px-Funazushi_%E9%AE%92%E5%AF%BF%E5%8F%B8_Maibara_City_Shiga_Japan_2022-10-06.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "琵琶湖（竹生島）": {
+  "title": "琵琶湖",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/df/Lake_biwa.jpg/960px-Lake_biwa.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "長浜曳山まつり": {
+  "title": "長浜曳山祭",
+  "thumb": null
+ },
+ "おごと温泉": {
+  "title": "雄琴温泉",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/46/Yumotokan-Ogoto_onsen_%26_Ogoto_port.jpg/960px-Yumotokan-Ogoto_onsen_%26_Ogoto_port.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "清水寺": {
+  "title": "清水寺",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ae/Kiyomizu-dera%2C_Kyoto%2C_November_2016_-02.jpg/960px-Kiyomizu-dera%2C_Kyoto%2C_November_2016_-02.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "平等院": {
+  "title": "平等院",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/ba/Phoenix_Hall_in_Byodo-in_Temple%2C_Ujirenge_Uji_city_2026.jpg/960px-Phoenix_Hall_in_Byodo-in_Temple%2C_Ujirenge_Uji_city_2026.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "鞍馬寺": {
+  "title": "鞍馬寺",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e4/Kurama-dera_sanmon.jpg/960px-Kurama-dera_sanmon.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "祇園祭": {
+  "title": "祇園祭",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5d/Gion_Matsuri_2017-5.jpg/960px-Gion_Matsuri_2017-5.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "産寧坂": {
+  "title": "産寧坂",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/55/Stone_stairway_Kiyomizu-dera.JPG/960px-Stone_stairway_Kiyomizu-dera.JPG?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "柿の葉ずし": {
+  "title": "柿の葉寿司",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/35/Kakinohazusi.jpg/960px-Kakinohazusi.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "吉野山": {
+  "title": "吉野山",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/79/Cherry_blossoms_at_Yoshinoyama_01.jpg/960px-Cherry_blossoms_at_Yoshinoyama_01.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "赤膚焼": {
+  "title": "赤膚焼",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/18/Double-spouted_Sake_Decanter_LACMA_M.2004.299.2a-b.jpg/960px-Double-spouted_Sake_Decanter_LACMA_M.2004.299.2a-b.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "那智の滝": {
+  "title": "那智滝",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/db/Nachi_Falls_2025-10-13.jpg/960px-Nachi_Falls_2025-10-13.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "橋杭岩": {
+  "title": "橋杭岩",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/36/180429_Hashiguiiwa_Kushimoto_Wakayama_pref_Japan02bs.jpg/960px-180429_Hashiguiiwa_Kushimoto_Wakayama_pref_Japan02bs.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "白浜温泉": {
+  "title": "白浜温泉",
+  "thumb": null
+ },
+ "三段壁": {
+  "title": "三段壁",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ad/131221_Sandanbeki_Shirahama_Wakayama_pref_Japan07bs12.jpg/960px-131221_Sandanbeki_Shirahama_Wakayama_pref_Japan07bs12.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "姫路城": {
+  "title": "姫路城",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c1/Himeji_castle_in_may_2015.jpg/960px-Himeji_castle_in_may_2015.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "有馬温泉": {
+  "title": "有馬温泉",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2c/170811_Rokko-Arima_Ropeway_Kobe_Japan00n.jpg/960px-170811_Rokko-Arima_Ropeway_Kobe_Japan00n.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "城崎温泉": {
+  "title": "城崎温泉",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/65/Kinosaki_onsen02_1920.jpg/960px-Kinosaki_onsen02_1920.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "竹田城跡": {
+  "title": "竹田城",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/26/%E7%AB%B9%E7%94%B0%E5%9F%8E.JPG/960px-%E7%AB%B9%E7%94%B0%E5%9F%8E.JPG?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "淡路島": {
+  "title": "淡路島",
+  "thumb": null
+ },
+ "三朝温泉": {
+  "title": "三朝温泉",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b6/Misasa_onsen_kawaranoyu_202106.jpg/960px-Misasa_onsen_kawaranoyu_202106.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "皆生温泉": {
+  "title": "皆生温泉",
+  "thumb": null
+ },
+ "弓ヶ浜": {
+  "title": "弓ヶ浜半島",
+  "thumb": null
+ },
+ "石見銀山": {
+  "title": "石見銀山",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bd/Shimizudani_Refinery_Ruins_at_Iwami_Ginzan_Silver_Mine_001.jpg/960px-Shimizudani_Refinery_Ruins_at_Iwami_Ginzan_Silver_Mine_001.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "宍道湖": {
+  "title": "宍道湖",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/13/Lake_shinji_landsat.jpg/960px-Lake_shinji_landsat.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "出雲大社": {
+  "title": "出雲大社",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1c/Haiden_of_Izumo-taisha-1.JPG/960px-Haiden_of_Izumo-taisha-1.JPG?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "松江城": {
+  "title": "松江城",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/88/Matsue_Castle_Keep_Tower_20230617.jpg/960px-Matsue_Castle_Keep_Tower_20230617.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "足立美術館": {
+  "title": "足立美術館",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/64/Adachi_Museum_of_Art10st3200.jpg/960px-Adachi_Museum_of_Art10st3200.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "隠岐": {
+  "title": "隠岐諸島",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/51/20090923%E9%9A%A0%E5%B2%90%E8%AB%B8%E5%B3%B6.jpg/960px-20090923%E9%9A%A0%E5%B2%90%E8%AB%B8%E5%B3%B6.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "津和野の鷺舞": {
+  "title": "鷺舞",
+  "thumb": null
+ },
+ "後楽園": {
+  "title": "後楽園",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4b/Okayama_Korakuen_Garden01.jpg/960px-Okayama_Korakuen_Garden01.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "倉敷（大原美術館）": {
+  "title": "大原美術館",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3a/Kurashiki_Ohara_Art_Museum02nt3200.jpg/960px-Kurashiki_Ohara_Art_Museum02nt3200.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "鷲羽山": {
+  "title": "鷲羽山",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c2/Mount_Washu_-_Looking_at_the_Seto_Inland_Sea.jpg/960px-Mount_Washu_-_Looking_at_the_Seto_Inland_Sea.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "ままかり": {
+  "title": "ままかり",
+  "thumb": "https://upload.wikimedia.org/wikipedia/commons/a/a7/Mamakari_by_Kossy%40FINEDAYS_in_Akabane%2C_Tokyo.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+ },
+ "宮島": {
+  "title": "厳島",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d1/Miyajima_From_The_Ferry_%2830093845%29.jpeg/960px-Miyajima_From_The_Ferry_%2830093845%29.jpeg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "縮景園": {
+  "title": "縮景園",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/32/Takueichi_Pond_in_Shukkei_Garden_19.jpg/960px-Takueichi_Pond_in_Shukkei_Garden_19.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "しまなみ海道": {
+  "title": "因島大橋",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4c/Innoshima_Bridge-2.JPG/960px-Innoshima_Bridge-2.JPG?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "鞆の浦": {
+  "title": "鞆の浦",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e9/Tomonoura_viewed_from_Taishiden.jpg/960px-Tomonoura_viewed_from_Taishiden.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "錦帯橋": {
+  "title": "錦帯橋",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/66/20100724_Iwakuni_5235.jpg/960px-20100724_Iwakuni_5235.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "秋芳洞": {
+  "title": "秋芳洞",
+  "thumb": null
+ },
+ "関門橋": {
+  "title": "関門橋",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d6/Kanmon-3.jpg/960px-Kanmon-3.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "先帝祭（下関）": {
+  "title": "先帝祭",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/40/%E4%B8%8B%E9%96%A2%E8%B1%8A%E5%89%8D%E7%94%B0%E5%95%86%E5%BA%97%E8%A1%97_%E5%85%88%E5%B8%9D%E7%A5%AD_%E4%B8%8A%E8%87%88%E9%81%93%E4%B8%AD_%E5%A3%B1.jpg/960px-%E4%B8%8B%E9%96%A2%E8%B1%8A%E5%89%8D%E7%94%B0%E5%95%86%E5%BA%97%E8%A1%97_%E5%85%88%E5%B8%9D%E7%A5%AD_%E4%B8%8A%E8%87%88%E9%81%93%E4%B8%AD_%E5%A3%B1.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "金刀比羅宮": {
+  "title": "金刀比羅宮",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3d/Kotohira-gu01s.jpg/960px-Kotohira-gu01s.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "小豆島・寒霞渓": {
+  "title": "小豆島",
+  "thumb": "https://upload.wikimedia.org/wikipedia/commons/f/fc/Syodoshima_landsat.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+ },
+ "銭形砂絵": {
+  "title": "銭形砂絵",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7c/Zenigata_sunae.jpeg/960px-Zenigata_sunae.jpeg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "直島（地中美術館）": {
+  "title": "直島",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6c/Naoshima_Islands%2C_Naoshima_Kagawa_Aerial_photograph.2007.jpg/960px-Naoshima_Islands%2C_Naoshima_Kagawa_Aerial_photograph.2007.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "大塚国際美術館": {
+  "title": "大塚国際美術館",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d3/The_Otsuka_Museum_of_Art20s3203-B-T.jpg/960px-The_Otsuka_Museum_of_Art20s3203-B-T.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "大歩危・小歩危": {
+  "title": "大歩危",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/ja/thumb/2/2b/Tokushima_Miyoshi_Yoshino_River_Of_Oboke_Gorge_1.JPG/960px-Tokushima_Miyoshi_Yoshino_River_Of_Oboke_Gorge_1.JPG?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "阿波おどり": {
+  "title": "阿波踊り",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/94/Awa-odori_2008_Tokushima.jpg/960px-Awa-odori_2008_Tokushima.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "祖谷": {
+  "title": "かずら橋",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/89/Iya_Valley_a.jpeg/960px-Iya_Valley_a.jpeg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "石鎚山": {
+  "title": "石鎚山",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/71/Isidutisan20220226_1.jpg/960px-Isidutisan20220226_1.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "道後温泉": {
+  "title": "道後温泉",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/83/D%C5%8Dgo_Onsen.jpg/960px-D%C5%8Dgo_Onsen.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "砥部焼": {
+  "title": "砥部焼",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b5/Aichi_Prefectural_Ceramic_Museum_%2856%29.jpg/960px-Aichi_Prefectural_Ceramic_Museum_%2856%29.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "内子座": {
+  "title": "内子座",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e0/Uchiko-za_ac_%281%29.jpg/960px-Uchiko-za_ac_%281%29.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "桂浜": {
+  "title": "桂浜",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/ja/thumb/7/79/Kochi_Katsurahama_Daytime_2.JPG/960px-Kochi_Katsurahama_Daytime_2.JPG?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "皿鉢料理": {
+  "title": "皿鉢料理",
+  "thumb": "https://upload.wikimedia.org/wikipedia/commons/0/08/SawachiDish_Sushi_and_Tataki01.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+ },
+ "室戸岬": {
+  "title": "室戸岬",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d7/Murotomisaki20220510_4.jpg/960px-Murotomisaki20220510_4.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "門司港レトロ": {
+  "title": "門司港レトロ",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/db/140721_Mojiko_Retro_Kitakyushu_Japan01s3.jpg/960px-140721_Mojiko_Retro_Kitakyushu_Japan01s3.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "太宰府天満宮": {
+  "title": "太宰府天満宮",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8b/20100719_Dazaifu_Tenmangu_Shrine_3328.jpg/960px-20100719_Dazaifu_Tenmangu_Shrine_3328.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "柳川": {
+  "title": "柳川市",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2c/Fukuoka_Yanagawa03bs3200.jpg/960px-Fukuoka_Yanagawa03bs3200.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "がめ煮": {
+  "title": "がめ煮",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e4/%E3%81%8C%E3%82%81%E7%85%AE%EF%BC%88%E7%AD%91%E5%89%8D%E7%85%AE%EF%BC%89P1010424.jpg/960px-%E3%81%8C%E3%82%81%E7%85%AE%EF%BC%88%E7%AD%91%E5%89%8D%E7%85%AE%EF%BC%89P1010424.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "唐津くんち": {
+  "title": "唐津くんち",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/64/Hikiyama.jpg/960px-Hikiyama.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "嬉野温泉": {
+  "title": "嬉野温泉",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5e/Ureshino_onsen.jpg/960px-Ureshino_onsen.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "吉野ヶ里遺跡": {
+  "title": "吉野ヶ里遺跡",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/38/Yoshinogari-iseki_zenkei.JPG/960px-Yoshinogari-iseki_zenkei.JPG?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "有田焼": {
+  "title": "有田焼",
+  "thumb": "https://upload.wikimedia.org/wikipedia/commons/b/b0/ImariA.JPG?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+ },
+ "大浦天主堂": {
+  "title": "大浦天主堂",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4b/Oura_Cathedral_20180623.jpg/960px-Oura_Cathedral_20180623.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "原城跡": {
+  "title": "原城",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/79/Remains_of_Hara_castle.jpg/960px-Remains_of_Hara_castle.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "出島": {
+  "title": "出島",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/50/Plattegrond_van_Deshima.jpg/960px-Plattegrond_van_Deshima.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "雲仙": {
+  "title": "雲仙岳",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3d/Fugendake_02_Pyroplastic_flow_area.JPG/960px-Fugendake_02_Pyroplastic_flow_area.JPG?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "西海橋": {
+  "title": "西海橋",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0f/Saikai_bridge.JPG/960px-Saikai_bridge.JPG?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "平戸": {
+  "title": "平戸城",
+  "thumb": "https://upload.wikimedia.org/wikipedia/commons/3/3c/HiradoCastle3.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+ },
+ "通潤橋": {
+  "title": "通潤橋",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1f/Tsujyunkyo_edit.jpg/960px-Tsujyunkyo_edit.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "阿蘇": {
+  "title": "阿蘇山",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a1/20140516%E9%98%BF%E8%98%87%E5%B1%B1%E5%BA%83%E5%9F%9F.jpg/960px-20140516%E9%98%BF%E8%98%87%E5%B1%B1%E5%BA%83%E5%9F%9F.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "黒川温泉": {
+  "title": "黒川温泉",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/42/Kurokawa_Onsen_-%E6%B8%A9%E6%B3%89%E8%A1%97.jpg/960px-Kurokawa_Onsen_-%E6%B8%A9%E6%B3%89%E8%A1%97.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "人吉温泉": {
+  "title": "人吉温泉",
+  "thumb": null
+ },
+ "山鹿灯籠まつり": {
+  "title": "山鹿灯籠まつり",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/24/Yamaga-Lantern.JPG/960px-Yamaga-Lantern.JPG?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "別府": {
+  "title": "別府市",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cd/Beppu_Montage_2.jpg/960px-Beppu_Montage_2.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "由布院温泉": {
+  "title": "由布院温泉",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f5/Yufuin_Onsen_-Mus%C5%8Den_02.jpg/960px-Yufuin_Onsen_-Mus%C5%8Den_02.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "鉄輪温泉": {
+  "title": "鉄輪温泉",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cd/2020-02-24_Kannawa_Onsen_%E9%89%84%E8%BC%AA%E6%B8%A9%E6%B3%89%E5%85%A8%E6%99%AF_DSCF8631.jpg/960px-2020-02-24_Kannawa_Onsen_%E9%89%84%E8%BC%AA%E6%B8%A9%E6%B3%89%E5%85%A8%E6%99%AF_DSCF8631.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "西都原古墳群": {
+  "title": "西都原古墳群",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/31/Saitobaru_Kofungun_air.jpg/960px-Saitobaru_Kofungun_air.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "鵜戸神宮": {
+  "title": "鵜戸神宮",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/74/Udo-jingu_Main-shrine.jpg/960px-Udo-jingu_Main-shrine.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "日南海岸": {
+  "title": "日南海岸国定公園",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/02/2021-01-07_Aoshima_Island_%28Miyazaki%29Aerial_photography%E9%9D%92%E5%B3%B6_%28%E5%AE%AE%E5%B4%8E%E7%9C%8C%29DJI_0246_%282%29%E7%A9%BA%E6%92%AE.jpg/960px-2021-01-07_Aoshima_Island_%28Miyazaki%29Aerial_photography%E9%9D%92%E5%B3%B6_%28%E5%AE%AE%E5%B4%8E%E7%9C%8C%29DJI_0246_%282%29%E7%A9%BA%E6%92%AE.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "飫肥城": {
+  "title": "飫肥城",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/74/Obi_Castle_Otemon.jpg/960px-Obi_Castle_Otemon.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "知覧": {
+  "title": "知覧町",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bb/Tea_Plantation_in_Nansatsu_Plateau.jpg/960px-Tea_Plantation_in_Nansatsu_Plateau.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "指宿温泉": {
+  "title": "指宿温泉",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/17/Ibusuki.jpg/960px-Ibusuki.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "仙巌園": {
+  "title": "仙巌園",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a4/Isoteien-sakurajima2.jpg/960px-Isoteien-sakurajima2.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "霧島神宮": {
+  "title": "霧島神宮",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7c/Kirishima-Jingu_Front.jpg/960px-Kirishima-Jingu_Front.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "屋久島": {
+  "title": "屋久島",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/68/Yakushima.jpg/960px-Yakushima.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "首里城": {
+  "title": "首里城",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/56/Naha_Okinawa_Japan_Shuri-Castle-01.jpg/960px-Naha_Okinawa_Japan_Shuri-Castle-01.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "識名園": {
+  "title": "識名園",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4b/Naha_Shikinaen17n4272.jpg/960px-Naha_Shikinaen17n4272.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "座喜味・今帰仁・中城城跡": {
+  "title": "座喜味城",
+  "thumb": "https://upload.wikimedia.org/wikipedia/commons/d/d9/Zakimigusuku.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+ },
+ "川平湾": {
+  "title": "川平湾",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/90/Kabira-Bay-Kabira-park-2019.jpg/960px-Kabira-Bay-Kabira-park-2019.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ },
+ "万座毛": {
+  "title": "万座毛",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/53/Onna_Okinawa_Japan_Cape-Manzamo-01.jpg/960px-Onna_Okinawa_Japan_Cape-Manzamo-01.jpg?utm_source=ja.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+ }
+}

@@ -40,6 +40,10 @@ python3 tools/build_japan_geo.py
 # 暗記リストに項目を足したら tsv に座標も足す（無いとエラー。料理など地点がないものは - ）。座標が別の県に入るとエラー
 python3 tools/build_geo_quiz.py
 
+# クイズの写真（Wikipedia 記事の代表画像URL）を tools/src/geo_images.json に取得。新しい項目だけ取りに行く（要ネット接続）
+# 県の記事や地図の画像は答えがばれるので使わない。ずれたら json の title を直して --only <項目名>
+python3 tools/fetch_geo_images.py
+
 # ローカル確認（file:// では app_data.js 読込も localStorage も動かない）
 python3 -m http.server 8731   # → http://localhost:8731/index.html
 ```

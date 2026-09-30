@@ -17,6 +17,7 @@ from build_ox_data import parse_geo, pref_label  # noqa: E402
 
 ROOT = jg.ROOT
 SPOTS_TSV = os.path.join(ROOT, "tools", "src", "geo_spots.tsv")
+IMAGES_JSON = os.path.join(ROOT, "tools", "src", "geo_images.json")  # tools/fetch_geo_images.py が作る
 OUT = os.path.join(ROOT, "geo_quiz_data.js")
 NEAR_DEG = 0.05  # 県の輪郭からこれ以内なら可（小島は地図データから省かれている／海沿いの名所のため）
 
@@ -71,6 +72,7 @@ def dist(pt, ring):
 
 def main():
     spots = load_spots()
+    images = json.load(open(IMAGES_JSON, encoding="utf-8")) if os.path.exists(IMAGES_JSON) else {}
     outlines = load_outlines()
     items, errors, near, used = [], [], [], set()
     for _region, prefs in parse_geo():
@@ -99,15 +101,19 @@ def main():
                     "name": re.sub(r"[（(].*?[）)]", "", place).strip(),
                     "hint": m.group(1) if m else "",
                     "pref": full, "prefId": pid, "points": pts,
+                    "img": (images.get(place) or {}).get("thumb"),
+                    "wiki": (images.get(place) or {}).get("title") if (images.get(place) or {}).get("thumb") else None,
                 })
     if errors:
         print(json.dumps({"errors": errors}, ensure_ascii=False, indent=1))
         sys.exit(1)
     with open(OUT, "w", encoding="utf-8") as f:
         f.write("// 自動生成: python3 tools/build_geo_quiz.py（手で編集しない。座標は tools/src/geo_spots.tsv）\n")
+        f.write("// 写真: Wikipedia 日本語版の各記事の代表画像（Wikimedia Commons、各画像のライセンスは記事から参照）\n")
         f.write("window.GEO_QUIZ = " + json.dumps(items, ensure_ascii=False, separators=(",", ":")) + ";\n")
     print(json.dumps({"items": len(items), "withPoints": sum(1 for i in items if i["points"]),
-                      "noPoints": [i["name"] for i in items if not i["points"]], "nearEdge": near,
+                      "noPoints": [i["name"] for i in items if not i["points"]],
+                      "withImage": sum(1 for i in items if i["img"]), "nearEdge": near,
                       "unusedSpots": sorted(set(spots) - used)}, ensure_ascii=False))
 
 
