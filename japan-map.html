@@ -170,7 +170,7 @@
 </div>
 <div id="label"></div>
 <div id="err">WebGL が使えないため表示できません。</div>
-<footer>出典: 地球地図日本（国土地理院）を加工して作成（<a href="https://github.com/dataofjapan/land" style="pointer-events:auto;color:inherit">dataofjapan/land</a>）。沖縄県は左上の枠内に移動、小笠原諸島などは省略。 ver. 2026-09-30 (v24)</footer>
+<footer>出典: 地球地図日本（国土地理院）を加工して作成（<a href="https://github.com/dataofjapan/land" style="pointer-events:auto;color:inherit">dataofjapan/land</a>）。沖縄県は左上の枠内に移動、小笠原諸島などは省略。 ver. 2026-09-30 (v25)</footer>
 <script src="japan_geo.js"></script>
 <script src="geo_quiz_data.js"></script>
 <!-- three.js は CDN から読むのでこのページはオフラインでは動かない -->
@@ -278,8 +278,7 @@ function pick(ev) {
   const hit = ray.intersectObjects(meshes, false)[0];
   return hit ? hit.object.userData.group : null;
 }
-// 強調はホバー中と選択中の県だけ。選択を切り替えたときも呼んで前の県の強調とラベルを戻す
-// 飛び出している間はほかの県を薄くして、手前の県を見分けやすくする
+// ホバー中・選択中の県を強調し、飛び出している間はほかの県を薄くする（選択の切り替え時も呼ぶ）
 function refresh() {
   for (const { mesh, line, group: g } of prefs) {
     const m = mesh.material, dim = !!selected && g !== selected;
@@ -313,13 +312,13 @@ const tmpPos = new THREE.Vector3(), tmpQuat = new THREE.Quaternion(), identity =
 const tmpOff = new THREE.Vector3(), tmpDir = new THREE.Vector3(), spinQuat = new THREE.Quaternion(), Y_AXIS = new THREE.Vector3(0, 1, 0), upAxis = new THREE.Vector3();
 const POP_SEC = 1.1, SPIN_TURNS = 2;
 const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
-// 進み具合 t（0=地図上, 1=手前）を時間で動かし、途中は画面の縦軸まわりに回しながら寄せる
 // 飛び出した県の見た目の大きさ。どの県もここまで拡大する（画面の縦横の短いほうの8割が上限）
 const POP_DIST = 16;
 function popTarget() {
   const h = 2 * POP_DIST * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
   return Math.min(h, h * camera.aspect) * 0.8;
 }
+// 進み具合 t（0=地図上, 1=手前）を時間で動かし、途中は画面の縦軸まわりに回しながら寄せる
 function animate(dt) {
   camera.getWorldDirection(tmpDir);
   upAxis.copy(Y_AXIS).applyQuaternion(camera.quaternion);
