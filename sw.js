@@ -1,5 +1,5 @@
 // Service Worker: アプリ一式をキャッシュしてオフライン動作させる
-const CACHE = "domtrip-v24";
+const CACHE = "domtrip-v25";
 const ASSETS = [
   "./",
   "index.html",
@@ -22,7 +22,8 @@ self.addEventListener("activate", (e) => {
   );
 });
 self.addEventListener("fetch", (e) => {
-  if (e.request.method !== "GET") return;
+  // 別サイト（three.js・フォント・Wikipedia の写真）はキャッシュしない。不透明なレスポンスが保存容量を大きく食うため
+  if (e.request.method !== "GET" || new URL(e.request.url).origin !== location.origin) return;
   e.respondWith(
     caches.match(e.request).then((hit) => hit || fetch(e.request).then((res) => {
       const copy = res.clone();
