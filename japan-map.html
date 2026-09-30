@@ -33,8 +33,9 @@
 </div>
 <div id="label"></div>
 <div id="err">WebGL が使えないため表示できません。</div>
-<footer>出典: 地球地図日本（国土地理院）を加工して作成（<a href="https://github.com/dataofjapan/land" style="pointer-events:auto;color:inherit">dataofjapan/land</a>）。沖縄県は左上の枠内に移動、小笠原諸島などは省略。 ver. 1</footer>
+<footer>出典: 地球地図日本（国土地理院）を加工して作成（<a href="https://github.com/dataofjapan/land" style="pointer-events:auto;color:inherit">dataofjapan/land</a>）。沖縄県は左上の枠内に移動、小笠原諸島などは省略。 ver. 2026-09-22 (v23)</footer>
 <script src="japan_geo.js"></script>
+<!-- three.js は CDN から読むのでこのページはオフラインでは動かない -->
 <script type="module">
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
@@ -48,8 +49,14 @@ const GEO = window.JAPAN_GEO;
 const el = document.getElementById("map");
 const label = document.getElementById("label");
 
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-if (!renderer.getContext()) document.getElementById("err").style.display = "flex";
+let renderer;
+try {
+  if (!GEO) throw new Error("japan_geo.js が読み込めない");
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+} catch (e) {
+  document.getElementById("err").style.display = "flex";
+  throw e;
+}
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 el.appendChild(renderer.domElement);
 
@@ -77,9 +84,9 @@ for (const p of GEO.prefectures) {
     shapes.push(shape);
   }
   // 飛び出し時の中心・大きさは一番大きい島で測る（東京都の伊豆諸島などに引っ張られないように）
-  const main = p.polygons.reduce((a, b) => (Math.abs(THREE.ShapeUtils.area(b[0].map(([x, y]) => new THREE.Vector2(x, y)))) >
-    Math.abs(THREE.ShapeUtils.area(a[0].map(([x, y]) => new THREE.Vector2(x, y)))) ? b : a));
-  const box = new THREE.Box2().setFromPoints(main[0].map(([x, y]) => new THREE.Vector2(x, y)));
+  const outers = shapes.map((sh) => sh.getPoints());
+  const areas = outers.map((pts) => Math.abs(THREE.ShapeUtils.area(pts)));
+  const box = new THREE.Box2().setFromPoints(outers[areas.indexOf(Math.max(...areas))]);
   const c = box.getCenter(new THREE.Vector2());
   const geom = new THREE.ExtrudeGeometry(shapes, { depth: DEPTH, bevelEnabled: false });
   geom.translate(-c.x, -c.y, 0);
@@ -128,14 +135,20 @@ function pick(ev) {
   const hit = ray.intersectObjects(meshes, false)[0];
   return hit ? hit.object.userData.group : null;
 }
-function setHover(g) {
-  if (hovered === g) return;
-  if (hovered && hovered !== selected) hovered.children[0].material.emissive.setHex(0x000000);
-  hovered = g;
-  if (g) g.children[0].material.emissive.setHex(0x333333);
-  const show = selected || g;
+// 強調はホバー中と選択中の県だけ。選択を切り替えたときも呼んで前の県の強調とラベルを戻す
+function refresh() {
+  for (const { mesh } of prefs) {
+    const g = mesh.userData.group;
+    mesh.material.emissive.setHex(g === hovered || g === selected ? 0x333333 : 0x000000);
+  }
+  const show = selected || hovered;
   label.style.display = show ? "block" : "none";
   if (show) label.textContent = show.userData.name;
+}
+function setHover(g) {
+  if (hovered === g) return;
+  hovered = g;
+  refresh();
 }
 renderer.domElement.addEventListener("pointermove", (ev) => setHover(pick(ev)));
 let downAt = null;
@@ -144,20 +157,21 @@ renderer.domElement.addEventListener("pointerup", (ev) => {
   if (!downAt || Math.hypot(ev.clientX - downAt[0], ev.clientY - downAt[1]) > 6) return; // ドラッグは無視
   const g = pick(ev);
   selected = (g && g !== selected) ? g : null;
-  setHover(g);
+  hovered = g;
+  refresh();
 });
 
 // 飛び出し先: カメラ前方の一定距離。県の大きさに合わせて拡大率を決める
 const tmpPos = new THREE.Vector3(), tmpQuat = new THREE.Quaternion(), identity = new THREE.Quaternion();
+const tmpDir = new THREE.Vector3(), tmpScale = new THREE.Vector3();
 function animate(dt) {
   const k = 1 - Math.pow(0.001, dt);
   for (const { group } of prefs) {
     const u = group.userData;
     let scale = 1;
     if (group === selected) {
-      const dir = new THREE.Vector3();
-      camera.getWorldDirection(dir);
-      tmpPos.copy(camera.position).addScaledVector(dir, 16);
+      camera.getWorldDirection(tmpDir);
+      tmpPos.copy(camera.position).addScaledVector(tmpDir, 16);
       tmpQuat.copy(camera.quaternion);
       scale = 3.2 / u.size;
     } else {
@@ -166,7 +180,7 @@ function animate(dt) {
     }
     group.position.lerp(tmpPos, k);
     group.quaternion.slerp(tmpQuat, k);
-    group.scale.lerp(new THREE.Vector3(scale, scale, scale), k);
+    group.scale.lerp(tmpScale.setScalar(scale), k);
   }
 }
 
