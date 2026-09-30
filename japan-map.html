@@ -185,7 +185,7 @@ renderer.domElement.addEventListener("pointerup", (ev) => {
   const g = pick(ev);
   hovered = g;
   if (mode === "quiz") answer(g);
-  else { selected = (g && g !== selected) ? g : null; refresh(); }
+  else { selected = (g && g !== selected) ? g : null; if (selected && selected.userData.t === 0) resetFocus(selected.userData); refresh(); }
 });
 
 // 飛び出し先: カメラ前方の一定距離。県の大きさに合わせて拡大率を決める
@@ -203,6 +203,7 @@ function animate(dt) {
     if (u.t === undefined) u.t = 0;
     if (u.t === goal && goal === 0) continue;
     u.t = goal ? Math.min(1, u.t + dt / POP_SEC) : Math.max(0, u.t - dt / POP_SEC);
+    if (u.t === 0) resetFocus(u); // 戻りきってから焦点を戻す（途中で戻すと位置と大きさが跳ねる）
     const e = easeInOut(u.t);
     tmpPos.copy(camera.position).addScaledVector(tmpDir, 16);
     const scale = 1 + (3.2 / u.popSize - 1) * e;
@@ -241,8 +242,8 @@ function shuffle(a) {
 function clearMarker() {
   if (marker) { marker.parent.remove(marker); marker.traverse((o) => o.geometry && o.geometry.dispose()); }
   marker = null;
-  for (const { group } of prefs) { group.userData.focus.set(0, 0, 0); group.userData.popSize = group.userData.size; }
 }
+function resetFocus(u) { u.focus.set(0, 0, 0); u.popSize = u.size; }
 // 点は県グループの子にして一緒に回す。飛び出し後の見た目の大きさがどの県でも同じになるよう拡大率で割る
 function showMarker(group, points) {
   clearMarker();
@@ -282,7 +283,7 @@ function nextQuestion() {
   clearMarker(); refresh();
   $("qName").textContent = cur.name;
   $("qMsg").className = "msg";
-  $("qMsg").textContent = "この観光地がある都道府県を地図でタップ";
+  $("qMsg").textContent = cur.points.length ? "この観光地がある都道府県を地図でタップ" : "この名物の都道府県を地図でタップ";
   $("next").style.visibility = "hidden";
   $("qScore").textContent = `${score[0]} / ${score[1]} 問正解`;
 }
