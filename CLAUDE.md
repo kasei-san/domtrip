@@ -36,6 +36,10 @@ python3 tools/build_ox_data.py
 # tools/src/japan.topojson → japan_geo.js を再生成（3D日本地図 japan-map.html 用。出典: 地球地図日本）
 python3 tools/build_japan_geo.py
 
+# cram-sheet.md の観光地理リスト＋tools/src/geo_spots.tsv（座標）→ geo_quiz_data.js（japan-map.html の観光地当てクイズ用）
+# 暗記リストに項目を足したら tsv に座標も足す（無いとエラー。料理など地点がないものは - ）。座標が別の県に入るとエラー
+python3 tools/build_geo_quiz.py
+
 # ローカル確認（file:// では app_data.js 読込も localStorage も動かない）
 python3 -m http.server 8731   # → http://localhost:8731/index.html
 ```
