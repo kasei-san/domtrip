@@ -5,3 +5,5 @@ questions/_自動生成_要検証/
 study-log/エクスポート/
 *.進捗.json
 domtrip進捗_*.json
+# Python のキャッシュ
+__pycache__/
