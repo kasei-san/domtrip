@@ -435,6 +435,15 @@ function blink(dt) {
   }
   glowMat.opacity = 0.6 + 0.4 * strobe;
 }
+// デモ撮影用: ?demo=松本城,支笏湖 でその順に出題し、県の画面座標を window.demoPrefPos(県ID) で返す
+const DEMO = new URLSearchParams(location.search).get("demo");
+if (DEMO) {
+  queue = DEMO.split(",").map((n) => QUIZ.find((q) => q.name === n)).filter(Boolean).reverse();
+  window.demoPrefPos = (id) => {
+    const v = prefById[id].group.userData.home.clone().project(camera);
+    return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight];
+  };
+}
 function nextQuestion() {
   if (!queue.length) queue = shuffle(QUIZ.slice());
   if (queue.length > 1 && cur && queue[queue.length - 1] === cur) queue.unshift(queue.pop()); // 同じ問題の連続を避ける
