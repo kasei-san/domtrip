@@ -3,21 +3,142 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>3D日本地図</title>
+<title>3D日本地図クイズ</title>
 <style>
   :root { color-scheme: light dark; --bg: #dfeaf2; --fg: #2b2620; --panel: rgba(255,255,255,0.85); --muted: #6b6252; }
   @media (prefers-color-scheme: dark) { :root { --bg: #14202b; --fg: #eee6d8; --panel: rgba(20,28,36,0.85); --muted: #a89b7d; } }
   html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--fg);
     font-family: -apple-system, "Hiragino Sans", "Yu Gothic", sans-serif; }
-  #map { position: fixed; inset: 0; }
+  #map { position: fixed; inset: 0; z-index: 1; }
+  .hud, .modes, #quiz, #label, footer { z-index: 4; }
+  /* ---- 演出: 正解は回る赤い光線＋紙吹雪、不正解は暗転＋雷雨 ---- */
+  :root { --display: "Dela Gothic One", "Hiragino Sans", "Yu Gothic", sans-serif; }
+  #fx { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0; transition: opacity .3s; overflow: hidden; }
+  body.win #fx { opacity: 1; background: #fffdf6; }
+  body.win #fx::before { content: ""; position: absolute; left: 50%; top: 55%; width: 260vmax; height: 260vmax; margin: -130vmax 0 0 -130vmax;
+    background: repeating-conic-gradient(#e0001b 0 7.5deg, #fffdf6 7.5deg 15deg); animation: spin 14s linear infinite, raysIn .6s ease-out; }
+  body.win #fx::after, body.lose #fx::after { content: ""; position: absolute; inset: 0; background: #fff; opacity: 0; }
+  body.win #fx::after { background: radial-gradient(circle at 50% 55%, #fff6c8, #ffd54a00 60%); animation: flash .8s ease-out; }
+  body.lose #fx { opacity: 1; background: radial-gradient(ellipse at 50% 30%, #262b36 0%, #05070a 80%); }
+  body.lose #fx::before { content: ""; position: absolute; inset: -80px; opacity: .55;
+    background: repeating-linear-gradient(100deg, transparent 0 14px, rgba(170,190,220,.55) 14px 15px, transparent 15px 38px);
+    animation: rain .22s linear infinite; }
+  body.lose #fx::after { animation: thunder 3.2s steps(1) infinite; }
+  body.win { --fg: #2b2620; --muted: #6b3a2a; --panel: rgba(255,255,255,0.92); }
+  body.lose { --fg: #8e97a8; --muted: #5d6676; --panel: rgba(8,10,16,0.85); }
+  body.lose #map, body.lose #quiz { animation: quake .9s; }
+  body.lose #quiz { transform: translateX(-50%) rotate(-2.5deg) translateY(8px); transition: transform .8s cubic-bezier(.3,1.6,.5,1); }
+  #confetti { position: fixed; inset: 0; z-index: 3; pointer-events: none; }
+  body.win #label, body.lose #label { display: none !important; }
+  #stamp, #bigX { position: fixed; left: 50%; top: 50%; z-index: 6; pointer-events: none; white-space: nowrap; font-family: var(--display);
+    transform: translate(-50%, -50%) scale(0); opacity: 0; }
+  #stamp { font-size: clamp(72px, 18vw, 220px); }
+  #stamp.win { color: #fff; -webkit-text-stroke: 8px #d7000f; paint-order: stroke fill; text-shadow: 0 10px 0 #8a0010, 0 0 60px #ffd54a;
+    animation: stampIn 1.5s cubic-bezier(.2,1.8,.4,1) forwards; }
+  #stamp.lose { color: #9aa3b4; font-size: clamp(56px, 13vw, 150px); text-shadow: 0 6px 24px #000; animation: sink 2.4s .5s ease-in forwards; }
+  #bigX { color: #ff1a1a; font-size: min(90vw, 90vh); line-height: 1; text-shadow: 0 0 60px #ff0000, 0 0 120px #800; }
+  #bigX.on { animation: xSlam .9s cubic-bezier(.2,1.6,.4,1) forwards; }
+  /* 正解の県名（特大） */
+  #answerRow { position: fixed; left: 0; right: 0; bottom: 64px; z-index: 5; pointer-events: none;
+    display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 12px 28px; }
+  #prefBig { white-space: nowrap; font-family: var(--display); font-size: clamp(80px, 20vw, 280px); line-height: 1; opacity: 0; }
+  #prefBig.win { opacity: 1; color: #ffd400; -webkit-text-stroke: 10px #b80012; paint-order: stroke fill;
+    text-shadow: 0 12px 0 #6b000a, 0 0 50px #fff27a; animation: prefWin 1s .35s cubic-bezier(.2,1.8,.4,1) both, wobble 1.2s 1.4s ease-in-out infinite; }
+  #prefBig.lose { opacity: 1; color: #c6ccd8; -webkit-text-stroke: 6px #10131a; paint-order: stroke fill;
+    text-shadow: 0 0 30px #3c6cff, 0 16px 30px #000; animation: prefLose 1.2s .9s ease-out both, droop 3s 2.1s ease-in-out infinite; }
+  /* 観光地の写真 */
+  #photo { position: fixed; right: 20px; top: 50%; z-index: 5; width: min(30vw, 380px); background: #fff; padding: 10px 10px 6px;
+    box-shadow: 0 16px 40px rgba(0,0,0,.45); border-radius: 4px; display: none; color: #333; font-size: 11px; }
+  #photo img { display: block; width: 100%; max-height: 42vh; object-fit: cover; background: #ddd; }
+  #photo a { color: #666; }
+  #photo.win { display: block; animation: photoIn .7s .5s cubic-bezier(.2,1.6,.4,1) both; }
+  #photo.lose { display: block; animation: photoIn .7s 1.2s cubic-bezier(.2,1.6,.4,1) both; filter: grayscale(.6) brightness(.8); }
+  @media (max-width: 700px) {
+    #photo { width: 44vw; top: auto; bottom: calc(52px + 20vw + 110px); right: 10px; }
+    #answerRow { bottom: 52px; }
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes raysIn { from { opacity: 0; transform: scale(.3) rotate(-60deg); } }
+  @keyframes flash { 0% { opacity: 1; } 100% { opacity: 0; } }
+  @keyframes thunder { 0% { opacity: .9; } 3% { opacity: 0; } 6% { opacity: .7; } 8% { opacity: 0; } 55% { opacity: 0; } 57% { opacity: .5; } 59% { opacity: 0; } }
+  @keyframes rain { to { transform: translate(-14px, 80px); } }
+  @keyframes quake { 0%,100% { translate: 0 0; } 10% { translate: -24px 6px; } 20% { translate: 20px -8px; } 30% { translate: -16px 4px; }
+    40% { translate: 14px 6px; } 50% { translate: -10px -4px; } 60% { translate: 8px 2px; } 70% { translate: -5px 0; } 85% { translate: 3px 0; } }
+  @keyframes stampIn { 0% { transform: translate(-50%, -50%) scale(5) rotate(-18deg); opacity: 0; }
+    30% { transform: translate(-50%, -50%) scale(1) rotate(-6deg); opacity: 1; }
+    40% { transform: translate(-50%, -50%) scale(1.15) rotate(-6deg); }
+    75% { transform: translate(-50%, -50%) scale(1.05) rotate(-6deg); opacity: 1; }
+    100% { transform: translate(-50%, -160%) scale(.4) rotate(-6deg); opacity: 0; } }
+  @keyframes sink { 0% { transform: translate(-50%, -90%); opacity: 0; } 20% { opacity: 1; } 70% { transform: translate(-50%, -40%) rotate(3deg); opacity: .9; }
+    100% { transform: translate(-50%, 60%) rotate(8deg); opacity: 0; } }
+  @keyframes xSlam { 0% { transform: translate(-50%, -50%) scale(4) rotate(30deg); opacity: 0; }
+    25% { transform: translate(-50%, -50%) scale(.9) rotate(0); opacity: 1; } 35% { transform: translate(-50%, -50%) scale(1.05); }
+    70% { transform: translate(-50%, -50%) scale(1); opacity: .9; } 100% { transform: translate(-50%, -50%) scale(1.6); opacity: 0; } }
+  @keyframes prefWin { 0% { transform: translateY(120%) scale(.2) rotate(-20deg); } 100% { transform: scale(1) rotate(-3deg); } }
+  @keyframes wobble { 50% { transform: scale(1.08) rotate(3deg); } 0%,100% { transform: scale(1) rotate(-3deg); } }
+  @keyframes prefLose { 0% { transform: translateY(-60vh); filter: blur(10px); } 70% { transform: translateY(6%); filter: blur(0); }
+    100% { transform: none; } }
+  @keyframes droop { 50% { transform: translateY(10px) skewX(-4deg); } }
+  @keyframes photoIn { 0% { transform: translateY(-50%) translateX(140%) rotate(40deg); } 100% { transform: translateY(-50%) rotate(4deg); } }
+  @media (max-width: 700px) { @keyframes photoIn { 0% { transform: translateX(140%) rotate(40deg); } 100% { transform: rotate(4deg); } } }
+  @keyframes slam { 0% { transform: scale(3); opacity: 0; filter: blur(8px); } 60% { transform: scale(.92); opacity: 1; filter: blur(0); }
+    80% { transform: scale(1.04); } 100% { transform: scale(1); } }
+  /* ---- 10秒タイマー ---- */
+  #tfx { position: fixed; inset: 0; z-index: 7; pointer-events: none; }
+  #timer { position: fixed; left: 10px; top: 50%; z-index: 6; transform: translateY(-50%); font-family: var(--display); pointer-events: none;
+    font-size: clamp(34px, 6.5vw, 76px); color: #fff; -webkit-text-stroke: 5px #222; paint-order: stroke fill; font-variant-numeric: tabular-nums; }
+  #timer small { font-size: .4em; margin-left: 2px; }
+  body.pinch1 #timer { color: #ffd000; animation: beat .5s infinite; }
+  body.pinch2 #timer { color: #ff2a2a; -webkit-text-stroke-color: #fff; animation: beat .28s infinite; }
+  body.pinch3 #timer { animation: beat .14s infinite; font-size: clamp(48px, 10vw, 120px); }
+  #vignette { position: fixed; inset: 0; z-index: 3; pointer-events: none; opacity: 0; transition: opacity .4s;
+    box-shadow: inset 0 0 160px 40px rgba(255,0,0,.85); }
+  body.pinch1 #vignette { opacity: .35; animation: vpulse 1s infinite; }
+  body.pinch2 #vignette { opacity: .7; animation: vpulse .5s infinite; }
+  body.pinch3 #vignette { opacity: 1; animation: vpulse .25s infinite; }
+  body.pinch2 #quiz { box-shadow: 0 0 0 4px #ff2a2a, 0 0 40px #ff0000; }
+  #countBig { position: fixed; left: 50%; top: 50%; z-index: 2; pointer-events: none; font-family: var(--display); font-size: 75vmin; line-height: 1;
+    color: rgba(255,255,255,.4); -webkit-text-stroke: 4px rgba(0,0,0,.25); transform: translate(-50%, -50%) scale(0); opacity: 0; }
+  #countBig.red { color: rgba(255,30,30,.5); }
+  #countBig.on { animation: countFade .95s ease-out forwards; }
+  #quiz .q.glitch { text-shadow: -6px 0 #ff00ff, 6px 0 #00ffff; transform: translateX(calc(8px * var(--gx, 1))) skewX(-8deg); clip-path: inset(10% 0 30% 0); }
+  @keyframes beat { 50% { transform: translateY(-50%) scale(1.25); } }
+  @keyframes vpulse { 50% { opacity: .3; } }
+  @keyframes countFade { 0% { transform: translate(-50%, -50%) scale(1.5); opacity: .9; } 100% { transform: translate(-50%, -50%) scale(.3); opacity: 0; } }
   .hud { position: fixed; left: 16px; top: 12px; right: 16px; pointer-events: none; }
   .hud h1 { margin: 0; font-size: 1.05em; }
   .hud .sub { font-size: 0.8em; color: var(--muted); }
-  #label { position: fixed; top: 64px; left: 50%; transform: translateX(-50%); padding: 6px 16px;
+  @media (max-width: 480px) { .hud .sub { display: none; } }
+  #label { position: fixed; bottom: 56px; left: 50%; transform: translateX(-50%); padding: 6px 16px;
     border-radius: 999px; background: var(--panel); font-weight: bold; font-size: 1.1em; display: none; pointer-events: none; }
   footer { position: fixed; left: 16px; right: 16px; bottom: 8px; font-size: 0.72em; color: var(--muted); pointer-events: none; }
+  .modes { position: fixed; top: 10px; right: 16px; display: flex; gap: 6px; }
+  .modes button { font: inherit; font-size: 0.85em; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--muted);
+    background: var(--panel); color: var(--fg); cursor: pointer; }
+  .modes button.on { background: #c9622a; border-color: #c9622a; color: #fff; }
+  #quiz { position: fixed; top: 56px; left: 50%; transform: translateX(-50%); width: min(980px, calc(100% - 24px));
+    box-sizing: border-box; padding: 10px 16px; border-radius: 14px; background: var(--panel); text-align: center; }
+  #quiz .q { font-family: var(--display); font-size: clamp(64px, 18vw, 152px); line-height: 1.1; word-break: keep-all; overflow-wrap: anywhere; }
+  #quiz .q.long { font-size: clamp(30px, 8.5vw, 100px); }
+  #quiz .q.slam { animation: slam .55s cubic-bezier(.2,1.4,.4,1); }
+  #quiz .msg { font-size: 0.9em; color: var(--muted); min-height: 1.4em; }
+  #quiz .msg.ok { color: #2e9b5a; font-weight: bold; } #quiz .msg.ng { color: #d0453a; font-weight: bold; }
+  #quiz .row { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: 0.8em; color: var(--muted); }
+  #next { visibility: hidden; pointer-events: auto; font-family: var(--display); font-size: clamp(30px, 5.5vw, 72px); padding: .25em .8em;
+    border-radius: 999px; border: 5px solid #fff; background: #ff3b1f; color: #fff; cursor: pointer;
+    box-shadow: 0 8px 0 #8a1200, 0 0 30px rgba(255,80,0,.8); animation: nextPulse .8s ease-in-out infinite; }
+  #next:active { transform: translateY(6px); box-shadow: 0 2px 0 #8a1200; }
+  @keyframes nextPulse { 50% { scale: 1.08; } }
+  /* カードは地図（北海道など）に重なるので、クリックは下の地図へ通す */
+  #quiz { pointer-events: none; }
+  #quiz { background: transparent; padding-top: 0; }
+  #quiz .q { color: #fff; -webkit-text-stroke: 8px #1a1410; paint-order: stroke fill; text-shadow: 0 6px 0 rgba(0,0,0,.35); }
+  #quiz .msg, #quiz .row { text-shadow: 0 0 4px var(--bg), 0 0 8px var(--bg); }
+  body.win #quiz .msg, body.win #quiz .row { text-shadow: 0 0 3px #fff, 0 0 6px #fff, 0 0 10px #fff; }
   #err { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; padding: 16px; text-align: center; }
 </style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&display=swap">
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
@@ -26,15 +147,32 @@
 </script>
 </head>
 <body>
+<div id="fx"></div>
 <div id="map"></div>
+<canvas id="confetti"></canvas>
+<canvas id="tfx"></canvas>
+<div id="vignette"></div>
+<div id="countBig"></div>
+<div id="timer"><span id="tSec">10.00</span><small>秒</small></div>
+<div id="stamp"></div>
+<div id="bigX">×</div>
+<div id="answerRow"><div id="prefBig"></div><button id="next">次へ ▶</button></div>
+<figure id="photo" style="margin:0"><img id="photoImg" alt=""><figcaption>写真: <a id="photoSrc" target="_blank" rel="noopener"></a>（Wikipedia）</figcaption></figure>
 <div class="hud">
   <h1>3D日本地図</h1>
-  <div class="sub">ドラッグで回転・ホイール/ピンチで拡大。都道府県をタップすると手前に飛び出す（もう一度タップで戻る）</div>
+  <div class="sub" id="sub"></div>
+</div>
+<div class="modes"><button id="mQuiz" class="on">クイズ</button><button id="mMap">地図</button></div>
+<div id="quiz">
+  <div class="q" id="qName"></div>
+  <div class="msg" id="qMsg"></div>
+  <div class="row"><span id="qScore"></span></div>
 </div>
 <div id="label"></div>
 <div id="err">WebGL が使えないため表示できません。</div>
-<footer>出典: 地球地図日本（国土地理院）を加工して作成（<a href="https://github.com/dataofjapan/land" style="pointer-events:auto;color:inherit">dataofjapan/land</a>）。沖縄県は左上の枠内に移動、小笠原諸島などは省略。 ver. 2026-09-22 (v23)</footer>
+<footer>出典: 地球地図日本（国土地理院）を加工して作成（<a href="https://github.com/dataofjapan/land" style="pointer-events:auto;color:inherit">dataofjapan/land</a>）。沖縄県は左上の枠内に移動、小笠原諸島などは省略。 ver. 2026-09-30 (v24)</footer>
 <script src="japan_geo.js"></script>
+<script src="geo_quiz_data.js"></script>
 <!-- three.js は CDN から読むのでこのページはオフラインでは動かない -->
 <script type="module">
 import * as THREE from "three";
@@ -62,8 +200,9 @@ el.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 500);
-const CENTER = new THREE.Vector3(-0.6, -1.5, 0);
-const VIEW_DIR = new THREE.Vector3(0, -14, 26).normalize(), BASE_DIST = Math.hypot(14, 26);
+// 上の問題カードに北海道が隠れないよう、注視点を上げて地図を画面の下寄りに置く
+const CENTER = new THREE.Vector3(-0.6, 1.6, 0);
+const VIEW_DIR = new THREE.Vector3(0, -14, 26).normalize(), BASE_DIST = Math.hypot(14, 26) * 1.22;
 camera.position.copy(CENTER).addScaledVector(VIEW_DIR, BASE_DIST);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.target.copy(CENTER);
@@ -111,11 +250,14 @@ for (const p of GEO.prefectures) {
   const group = new THREE.Group();
   group.add(mesh, line);
   group.position.set(c.x, c.y, 0);
-  group.userData = { id: p.id, name: p.name, home: new THREE.Vector3(c.x, c.y, 0), size: Math.max(box.max.x - box.min.x, box.max.y - box.min.y) };
+  const size = Math.max(box.max.x - box.min.x, box.max.y - box.min.y);
+  // focus/popSize: 飛び出したとき正面に来る点（県ローカル座標）と、画面に収める幅。クイズでは観光地が入るよう広げる
+  group.userData = { id: p.id, name: p.name, home: new THREE.Vector3(c.x, c.y, 0), box, size, focus: new THREE.Vector3(), popSize: size };
   mesh.userData.group = group;
   scene.add(group);
-  prefs.push({ group, mesh, color });
+  prefs.push({ group, mesh, line, color });
 }
+const prefById = Object.fromEntries(prefs.map((p) => [p.group.userData.id, p]));
 
 // 沖縄の枠（天気図の区切り）
 {
@@ -128,7 +270,7 @@ for (const p of GEO.prefectures) {
 const ray = new THREE.Raycaster();
 const ndc = new THREE.Vector2();
 const meshes = prefs.map((p) => p.mesh);
-let hovered = null, selected = null;
+let hovered = null, selected = null, wrongPick = null;
 function pick(ev) {
   const r = renderer.domElement.getBoundingClientRect();
   ndc.set(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
@@ -137,10 +279,14 @@ function pick(ev) {
   return hit ? hit.object.userData.group : null;
 }
 // 強調はホバー中と選択中の県だけ。選択を切り替えたときも呼んで前の県の強調とラベルを戻す
+// 飛び出している間はほかの県を薄くして、手前の県を見分けやすくする
 function refresh() {
-  for (const { mesh } of prefs) {
-    const g = mesh.userData.group;
-    mesh.material.emissive.setHex(g === hovered || g === selected ? 0x333333 : 0x000000);
+  for (const { mesh, line, group: g } of prefs) {
+    const m = mesh.material, dim = !!selected && g !== selected;
+    m.emissive.setHex(g === wrongPick ? 0x802018 : g === hovered || g === selected ? 0x333333 : 0x000000);
+    if (m.transparent !== dim) { m.transparent = dim; m.depthWrite = !dim; m.needsUpdate = true; } // 半透明は薄くする間だけ
+    m.opacity = dim ? 0.25 : 1;
+    line.material.opacity = dim ? 0.15 : 0.55;
   }
   const show = selected || hovered;
   label.style.display = show ? "block" : "none";
@@ -157,17 +303,23 @@ renderer.domElement.addEventListener("pointerdown", (ev) => { downAt = [ev.clien
 renderer.domElement.addEventListener("pointerup", (ev) => {
   if (!downAt || Math.hypot(ev.clientX - downAt[0], ev.clientY - downAt[1]) > 6) return; // ドラッグは無視
   const g = pick(ev);
-  selected = (g && g !== selected) ? g : null;
   hovered = g;
-  refresh();
+  if (mode === "quiz") answer(g);
+  else { selected = (g && g !== selected) ? g : null; if (selected && selected.userData.t === 0) resetFocus(selected.userData); refresh(); }
 });
 
 // 飛び出し先: カメラ前方の一定距離。県の大きさに合わせて拡大率を決める
 const tmpPos = new THREE.Vector3(), tmpQuat = new THREE.Quaternion(), identity = new THREE.Quaternion();
-const tmpDir = new THREE.Vector3(), spinQuat = new THREE.Quaternion(), Y_AXIS = new THREE.Vector3(0, 1, 0), upAxis = new THREE.Vector3();
+const tmpOff = new THREE.Vector3(), tmpDir = new THREE.Vector3(), spinQuat = new THREE.Quaternion(), Y_AXIS = new THREE.Vector3(0, 1, 0), upAxis = new THREE.Vector3();
 const POP_SEC = 1.1, SPIN_TURNS = 2;
 const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 // 進み具合 t（0=地図上, 1=手前）を時間で動かし、途中は画面の縦軸まわりに回しながら寄せる
+// 飛び出した県の見た目の大きさ。どの県もここまで拡大する（画面の縦横の短いほうの8割が上限）
+const POP_DIST = 16;
+function popTarget() {
+  const h = 2 * POP_DIST * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+  return Math.min(h, h * camera.aspect) * 0.8;
+}
 function animate(dt) {
   camera.getWorldDirection(tmpDir);
   upAxis.copy(Y_AXIS).applyQuaternion(camera.quaternion);
@@ -177,13 +329,16 @@ function animate(dt) {
     if (u.t === undefined) u.t = 0;
     if (u.t === goal && goal === 0) continue;
     u.t = goal ? Math.min(1, u.t + dt / POP_SEC) : Math.max(0, u.t - dt / POP_SEC);
+    if (!goal && u.t === 0) resetFocus(u); // 戻りきってから焦点を戻す（途中で戻すと位置と大きさが跳ねる）
     const e = easeInOut(u.t);
-    tmpPos.copy(camera.position).addScaledVector(tmpDir, 16);
-    group.position.lerpVectors(u.home, tmpPos, e);
-    group.scale.setScalar(1 + (3.2 / u.size - 1) * e);
+    tmpPos.copy(camera.position).addScaledVector(tmpDir, POP_DIST).addScaledVector(upAxis, popTarget() * 0.12); // 県名の上に来るよう少し上げる
+    const scale = 1 + (popTarget() / u.popSize - 1) * e;
+    group.scale.setScalar(scale);
     tmpQuat.slerpQuaternions(identity, camera.quaternion, e);
     spinQuat.setFromAxisAngle(upAxis, (1 - e) * SPIN_TURNS * Math.PI * 2);
     group.quaternion.copy(spinQuat).multiply(tmpQuat);
+    tmpOff.copy(u.focus).multiplyScalar(scale * e).applyQuaternion(group.quaternion);
+    group.position.lerpVectors(u.home, tmpPos, e).sub(tmpOff);
   }
 }
 
@@ -200,9 +355,281 @@ function resize() {
 addEventListener("resize", resize);
 resize();
 
+// ---- 観光地当てクイズ: 地名が出る → 県をタップ → 正解の県が飛び出して観光地が点滅 ----
+const QUIZ = window.GEO_QUIZ || [];
+const $ = (id) => document.getElementById(id);
+let mode = "quiz", queue = [], cur = null, qNo = 0, answered = false, score = [0, 0], marker = null, blinkT = 0;
+// 観光地の印: 芯・光のにじみ・回る光条・広がる輪3本。地図より手前に常に描き、色と明るさを激しく変えて目に焼き付ける
+const markerMat = new THREE.MeshBasicMaterial({ color: 0xff3b30, transparent: true, depthTest: false });
+const ringMats = [0, 1, 2].map(() => new THREE.MeshBasicMaterial({ color: 0xffd400, transparent: true, side: THREE.DoubleSide, depthTest: false }));
+function canvasTex(draw) {
+  const c = document.createElement("canvas"); c.width = c.height = 128;
+  draw(c.getContext("2d")); return new THREE.CanvasTexture(c);
+}
+const GLOW = canvasTex((g) => {
+  const r = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  r.addColorStop(0, "#fff"); r.addColorStop(0.2, "rgba(255,240,120,1)"); r.addColorStop(0.5, "rgba(255,60,40,.6)"); r.addColorStop(1, "rgba(255,0,0,0)");
+  g.fillStyle = r; g.fillRect(0, 0, 128, 128);
+});
+const STAR = canvasTex((g) => {
+  g.translate(64, 64);
+  for (let i = 0; i < 12; i++) {
+    g.rotate(Math.PI / 6);
+    const l = g.createLinearGradient(0, 0, 0, i % 2 ? -40 : -64);
+    l.addColorStop(0, "rgba(255,255,220,1)"); l.addColorStop(1, "rgba(255,200,0,0)");
+    g.fillStyle = l; g.beginPath(); g.moveTo(-5, 0); g.lineTo(0, i % 2 ? -40 : -64); g.lineTo(5, 0); g.fill();
+  }
+});
+const glowMat = new THREE.SpriteMaterial({ map: GLOW, blending: THREE.AdditiveBlending, depthTest: false, transparent: true });
+const starMat = new THREE.SpriteMaterial({ map: STAR, blending: THREE.AdditiveBlending, depthTest: false, transparent: true });
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+function clearMarker() {
+  if (marker) { marker.parent.remove(marker); marker.traverse((o) => o.geometry && o.geometry.dispose()); }
+  marker = null;
+}
+function resetFocus(u) { u.focus.set(0, 0, 0); u.popSize = u.size; }
+// 点は県グループの子にして一緒に回す。飛び出し後の見た目の大きさがどの県でも同じになるよう拡大率で割る
+function showMarker(group, points) {
+  clearMarker();
+  const u = group.userData, c = u.home;
+  // 離島の観光地（川平湾・屋久島など）も画面に入るよう、本島の範囲に観光地を足した範囲を正面に出す
+  const fb = u.box.clone();
+  for (const [x, y] of points) fb.expandByPoint(new THREE.Vector2(x, y));
+  const fc = fb.getCenter(new THREE.Vector2());
+  // 下の特大の県名や写真に印が隠れないよう、正面に来る点を観光地の方へ半分寄せる
+  if (points.length) {
+    const pc = points.reduce((a, [x, y]) => a.add(new THREE.Vector2(x, y)), new THREE.Vector2()).divideScalar(points.length);
+    fc.lerp(pc, 0.5);
+  }
+  u.focus.set(fc.x - c.x, fc.y - c.y, 0);
+  u.popSize = Math.max(fb.max.x - fb.min.x, fb.max.y - fb.min.y) * 1.3;
+  const k = (u.popSize / popTarget()) * 1.4; // 県を大きくした分、印も少し大きく
+  marker = new THREE.Group();
+  for (const [x, y] of points) {
+    const at = (o, z) => { o.position.set(x - c.x, y - c.y, DEPTH + z); o.renderOrder = 20; marker.add(o); return o; };
+    at(new THREE.Sprite(starMat), 0.2 * k).userData = { star: true, k };
+    at(new THREE.Sprite(glowMat), 0.21 * k).userData = { glow: true, k };
+    for (let i = 0; i < 3; i++) at(new THREE.Mesh(new THREE.RingGeometry(0.12 * k, 0.17 * k, 40), ringMats[i]), 0.01).userData = { ring: i };
+    at(new THREE.Mesh(new THREE.SphereGeometry(0.11 * k, 20, 12), markerMat), 0.22 * k);
+  }
+  group.add(marker);
+}
+function blink(dt) {
+  if (!marker) return;
+  blinkT += dt;
+  const strobe = Math.sin(blinkT * 22) > 0 ? 1 : 0.35, v = 0.5 + 0.5 * Math.sin(blinkT * 9);
+  markerMat.color.setHSL((blinkT * 1.5) % 1, 1, 0.55);
+  markerMat.opacity = strobe;
+  for (const m of marker.children) {
+    const d = m.userData;
+    if (d.ring !== undefined) {
+      const ph = (blinkT * 1.4 + d.ring / 3) % 1;
+      m.scale.setScalar(1 + ph * 4);
+      ringMats[d.ring].opacity = 1 - ph;
+      ringMats[d.ring].color.setHSL((0.12 - ph * 0.12 + 1) % 1, 1, 0.55);
+    } else if (d.glow) m.scale.setScalar(d.k * (1.1 + v * 1.3));
+    else if (d.star) { m.scale.setScalar(d.k * (2.2 + v * 1.2)); m.material.rotation = blinkT * 2.5; }
+  }
+  glowMat.opacity = 0.6 + 0.4 * strobe;
+}
+// デモ撮影用: ?demo=松本城,支笏湖 でその順に出題し、県の画面座標を window.demoPrefPos(県ID) で返す
+const DEMO = new URLSearchParams(location.search).get("demo");
+if (DEMO) {
+  queue = DEMO.split(",").map((n) => QUIZ.find((q) => q.name === n)).filter(Boolean).reverse();
+  window.demoPrefPos = (id) => {
+    const v = prefById[id].group.userData.home.clone().project(camera);
+    return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight];
+  };
+}
+function nextQuestion() {
+  if (!queue.length) queue = shuffle(QUIZ.slice());
+  if (queue.length > 1 && cur && queue[queue.length - 1] === cur) queue.unshift(queue.pop()); // 同じ問題の連続を避ける
+  cur = queue.pop();
+  qNo++;
+  answered = false; selected = null; wrongPick = null;
+  clearMarker(); refresh();
+  $("qName").textContent = cur.name;
+  $("qName").classList.toggle("long", cur.name.length > 6);
+  const q = $("qName"); q.classList.remove("slam"); void q.offsetWidth; q.classList.add("slam"); // 毎問アニメを出し直す
+  setFx(null);
+  $("qMsg").className = "msg";
+  $("qMsg").textContent = cur.points.length ? "この観光地がある都道府県を地図でタップ" : "この名物の都道府県を地図でタップ";
+  $("next").style.visibility = "hidden";
+  $("qScore").textContent = `${score[0]} / ${score[1]} 問正解`;
+  startTimer();
+}
+// timeout=true は10秒経過（不正解扱い）
+function answer(g, timeout = false) {
+  if ((!g && !timeout) || answered || !cur) return;
+  answered = true;
+  stopTimer();
+  const target = prefById[cur.prefId].group, ok = !timeout && g === target;
+  score[1]++; if (ok) score[0]++;
+  const hint = cur.hint ? `（${cur.hint}）` : "";
+  $("qMsg").className = "msg " + (ok ? "ok" : "ng");
+  $("qMsg").textContent = ok ? `○ 正解！ ${cur.pref}${hint}` : timeout ? `⏰ 時間切れ！ 正解は ${cur.pref}${hint}` : `× ${g.userData.name}ではなく ${cur.pref}${hint}`;
+  $("qScore").textContent = `${score[0]} / ${score[1]} 問正解`;
+  $("next").style.visibility = "visible";
+  setFx(ok ? "win" : "lose");
+  const reveal = () => { wrongPick = null; selected = target; blinkT = 0; showMarker(target, cur.points); refresh(); };
+  if (ok) reveal();
+  else if (timeout) { const no = qNo; setTimeout(() => { if (no === qNo && mode === "quiz") reveal(); }, 400); }
+  else { const no = qNo; wrongPick = g; refresh(); setTimeout(() => { if (no === qNo && mode === "quiz") reveal(); }, 700); }
+}
+// ---- 正解/不正解の演出 ----
+const hemi = scene.children.find((o) => o.isHemisphereLight);
+const cvs = $("confetti"), ctx = cvs.getContext("2d");
+let pieces = [];
+const restart = (el, cls) => { el.className = ""; void el.offsetWidth; if (cls) el.className = cls; }; // CSSアニメを頭から再生
+function setFx(kind) {
+  document.body.classList.toggle("win", kind === "win");
+  document.body.classList.toggle("lose", kind === "lose");
+  const st = $("stamp");
+  st.textContent = kind === "win" ? "正解！" : "ざんねん…";
+  restart(st, kind);
+  restart($("bigX"), kind === "lose" ? "on" : "");
+  $("prefBig").textContent = kind && cur ? cur.pref : "";
+  restart($("prefBig"), kind);
+  const ph = $("photo");
+  if (kind && cur && cur.img) {
+    $("photoImg").src = cur.img;
+    $("photoSrc").textContent = cur.wiki;
+    $("photoSrc").href = "https://ja.wikipedia.org/wiki/" + encodeURIComponent(cur.wiki);
+    restart(ph, kind);
+  } else restart(ph, "");
+  hemi.intensity = kind === "lose" ? 0.5 : kind === "win" ? 2.2 : 1.6;
+  sun.intensity = kind === "lose" ? 0.6 : 1.8;
+  pieces = kind === "win" ? burst() : kind === "lose" ? tears() : [];
+  if (kind === "win") { // 紙吹雪は3連発
+    const no = qNo;
+    for (const ms of [450, 900]) setTimeout(() => { if (no === qNo) pieces = pieces.concat(burst()); }, ms);
+  }
+}
+// 不正解の涙（青い雫が上から大量に落ちる）
+function tears() {
+  return Array.from({ length: 260 }, () => ({ drop: true, x: Math.random() * innerWidth, y: -Math.random() * innerHeight,
+    vx: -1, vy: 8 + Math.random() * 10, r: 0, vr: 0, w: 3, h: 14 + Math.random() * 18, c: "rgba(120,160,255,.75)", life: 0 }));
+}
+// 紅白と金の紙吹雪。画面中央下から打ち上げて、ひらひら落とす
+function burst() {
+  const w = innerWidth, h = innerHeight, colors = ["#d7000f", "#ffffff", "#f5c542", "#ff5c8a", "#ffe9a8"];
+  return Array.from({ length: 220 }, (_, i) => {
+    const fromSide = i % 3 ? (i % 2 ? 0 : w) : w / 2;
+    return { x: fromSide, y: h * (i % 3 ? 0.9 : 0.7), vx: (fromSide === 0 ? 1 : fromSide === w ? -1 : 0) * (4 + Math.random() * 10) + (Math.random() - .5) * 8,
+      vy: -(10 + Math.random() * 14), r: Math.random() * Math.PI, vr: (Math.random() - .5) * .4,
+      w: 6 + Math.random() * 8, h: 10 + Math.random() * 10, c: colors[i % colors.length], life: 0 };
+  });
+}
+function drawConfetti(dt) {
+  if (cvs.width !== innerWidth || cvs.height !== innerHeight) { cvs.width = innerWidth; cvs.height = innerHeight; }
+  ctx.clearRect(0, 0, cvs.width, cvs.height);
+  const f = dt * 60;
+  for (const p of pieces) {
+    if (p.drop) {
+      p.x += p.vx * f; p.y += p.vy * f;
+      if (p.y > cvs.height) { p.y = -20; p.x = Math.random() * cvs.width; p.life += 1; }
+      ctx.fillStyle = p.c; ctx.fillRect(p.x, p.y, p.w, p.h);
+      continue;
+    }
+    p.life += dt; p.vy += 0.35 * f; p.vx *= Math.pow(0.985, f); p.vy = Math.min(p.vy, 3.2 + Math.sin(p.life * 6) * 1.5);
+    p.x += (p.vx + Math.sin(p.life * 4 + p.r) * 1.2) * f; p.y += p.vy * f; p.r += p.vr * f;
+    ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.scale(1, Math.cos(p.life * 8 + p.r));
+    ctx.fillStyle = p.c; ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); ctx.restore();
+  }
+  pieces = pieces.filter((p) => (p.drop ? p.life < 3 : p.y < cvs.height + 40));
+}
+// ---- 10秒タイマー: 残り秒の表示・画面の縁を回るブロック・毎秒の揺れと巨大カウント・終盤のブロックノイズ ----
+const TIME = 10;
+const tcv = $("tfx"), tctx = tcv.getContext("2d");
+let tLeft = TIME, timing = false, lastWhole = TIME;
+function startTimer() { tLeft = TIME; lastWhole = TIME; timing = true; $("tSec").textContent = TIME.toFixed(2); }
+function stopTimer() {
+  timing = false;
+  document.body.classList.remove("pinch1", "pinch2", "pinch3");
+  $("qName").classList.remove("glitch");
+}
+function shake(el, amp) {
+  el.animate([0, 1, 2, 3, 4, 5].map((i) => ({ translate: i === 5 ? "0 0" : `${(Math.random() - 0.5) * 2 * amp}px ${(Math.random() - 0.5) * 2 * amp}px` })),
+    { duration: 260, easing: "linear" });
+}
+function secondTick(n, urg) {
+  const amp = 4 + urg * urg * 40;
+  for (const id of ["map", "quiz", "timer"]) shake($(id), amp);
+  if (n > 0) { $("countBig").textContent = n; restart($("countBig"), n <= 3 ? "on red" : "on"); }
+}
+// 画面の周（周長 P）上の距離 d を座標に直す。左上から時計回り
+function perim(d, W, H, sz) {
+  const P = 2 * (W + H); d = ((d % P) + P) % P;
+  if (d < W) return [d, 0];
+  if ((d -= W) < H) return [W - sz, d];
+  if ((d -= H) < W) return [W - d - sz, H - sz];
+  return [0, H - (d - W) - sz];
+}
+function tickTimer(dt) {
+  const W = innerWidth, H = innerHeight;
+  if (tcv.width !== W || tcv.height !== H) { tcv.width = W; tcv.height = H; }
+  tctx.clearRect(0, 0, W, H);
+  if (!timing) return;
+  tLeft = Math.max(0, tLeft - dt);
+  $("tSec").textContent = tLeft.toFixed(2);
+  const urg = 1 - tLeft / TIME, el = TIME - tLeft, P = 2 * (W + H);
+  const whole = Math.ceil(tLeft);
+  if (whole < lastWhole) { lastWhole = whole; secondTick(whole, urg); }
+  document.body.classList.toggle("pinch1", tLeft <= 6);
+  document.body.classList.toggle("pinch2", tLeft <= 3.5);
+  document.body.classList.toggle("pinch3", tLeft <= 1.5);
+  // 縁を1秒で1周するブロック。残りが減るほど列が長く・太く・赤く、本数も増える
+  const sz = 12 + urg * 26, count = Math.round(6 + urg * 34), snakes = 1 + Math.floor(urg * 3.2);
+  for (let sIdx = 0; sIdx < snakes; sIdx++) {
+    const head = (el % 1) * P + (sIdx * P) / snakes;
+    for (let i = 0; i < count; i++) {
+      const [x, y] = perim(head - i * (sz + 3), W, H, sz);
+      tctx.fillStyle = `hsla(${50 - urg * 50}, 100%, ${55 - i * 0.6}%, ${1 - i / count})`;
+      tctx.fillRect(x, y, sz, sz);
+    }
+  }
+  // 残り3.5秒からブロックノイズ。残りが少ないほど多く大きく
+  if (tLeft <= 3.5) {
+    const n = Math.floor((3.5 - tLeft) * 18 * Math.random());
+    const pal = ["#ff00ff", "#00ffff", "#ffffff", "#000000", "#ff0000", "#00ff66", "#777777"];
+    for (let i = 0; i < n; i++) {
+      tctx.globalAlpha = 0.4 + Math.random() * 0.5;
+      tctx.fillStyle = pal[(Math.random() * pal.length) | 0];
+      const bw = 16 + Math.random() * 220 * urg, bh = 4 + Math.random() * 46 * urg;
+      tctx.fillRect(Math.random() * W, Math.random() * H, bw, bh);
+    }
+    tctx.globalAlpha = 1;
+    $("qName").classList.toggle("glitch", Math.random() < 0.35);
+  }
+  if (tLeft <= 0) { timing = false; answer(null, true); }
+}
+function setMode(m) {
+  mode = m;
+  $("mQuiz").classList.toggle("on", m === "quiz");
+  $("mMap").classList.toggle("on", m === "map");
+  $("quiz").style.display = m === "quiz" ? "block" : "none";
+  $("sub").textContent = m === "quiz" ? "ドラッグで回転・ホイール/ピンチで拡大"
+    : "ドラッグで回転・ホイール/ピンチで拡大。都道府県をタップすると手前に飛び出す（もう一度タップで戻る）";
+  selected = null; wrongPick = null; clearMarker(); refresh(); setFx(null); stopTimer();
+  $("timer").style.display = m === "quiz" ? "block" : "none";
+  if (m === "quiz") nextQuestion();
+}
+$("mQuiz").onclick = () => setMode("quiz");
+$("mMap").onclick = () => setMode("map");
+$("next").onclick = () => nextQuestion();
+addEventListener("keydown", (e) => { if (e.target.tagName !== "BUTTON" && mode === "quiz" && answered && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); nextQuestion(); } });
+setMode("quiz");
+
 const clock = new THREE.Clock();
 renderer.setAnimationLoop(() => {
-  animate(Math.min(clock.getDelta(), 0.1));
+  const dt = Math.min(clock.getDelta(), 0.1);
+  animate(dt);
+  blink(dt);
+  drawConfetti(dt);
+  tickTimer(dt);
   controls.update();
   renderer.render(scene, camera);
 });

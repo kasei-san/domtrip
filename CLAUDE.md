@@ -36,6 +36,14 @@ python3 tools/build_ox_data.py
 # tools/src/japan.topojson → japan_geo.js を再生成（3D日本地図 japan-map.html 用。出典: 地球地図日本）
 python3 tools/build_japan_geo.py
 
+# cram-sheet.md の観光地理リスト＋tools/src/geo_spots.tsv（座標）→ geo_quiz_data.js（japan-map.html の観光地当てクイズ用）
+# 暗記リストに項目を足したら tsv に座標も足す（無いとエラー。料理など地点がないものは - ）。座標が別の県に入るとエラー
+python3 tools/build_geo_quiz.py
+
+# クイズの写真（Wikipedia 記事の代表画像URL）を tools/src/geo_images.json に取得。新しい項目だけ取りに行く（要ネット接続）
+# 県の記事や地図の画像は答えがばれるので使わない。ずれたら json の title を直して --only <項目名>
+python3 tools/fetch_geo_images.py
+
 # ローカル確認（file:// では app_data.js 読込も localStorage も動かない）
 python3 -m http.server 8731   # → http://localhost:8731/index.html
 ```
@@ -65,6 +73,13 @@ python3 -m http.server 8731   # → http://localhost:8731/index.html
 - 都道府県別の観光地理カード（`geo-<県>`）は `cram-sheet.md` の `### 観光地理 暗記リスト` から自動生成される（○＝正しい県、×＝同じ地方の別の県に差し替え）。`※` 付き注記の項目は誤答化を避けて除外
 - ○×の文は `cram-sheet.md` か `questions/` の解説に根拠があるものだけ。×は過去問のひっかけ（数字・主体・向きの入れ替え）に寄せる
 
+### 3D日本地図クイズ（`japan-map.html`、別URL）
+`tools/src/japan.topojson` →（`build_japan_geo.py`）→ `japan_geo.js`（県の形。沖縄は左上の枠へ移動、小笠原は省略）と、`cram-sheet.md` の観光地理リスト＋`tools/src/geo_spots.tsv`（座標）＋`tools/src/geo_images.json`（写真URL）→（`build_geo_quiz.py`）→ `geo_quiz_data.js` を three.js で描く。進捗は保存しない。
+- 座標は手入力。ビルドが県の範囲と照合し、別の県に入るとエラーにする（海沿いは海岸線から5km以内まで許容）
+- 写真は Wikipedia 記事の代表画像のURLだけを持つ（画像をリポジトリに置かない）。**県の記事や地図の画像は答えがばれるので使わない**（`fetch_geo_images.py` が除外する）
+- three.js（jsDelivr）・フォント（Google Fonts）・写真はネットから読むので、このページはオフラインでは動かない
+- `?demo=松本城,支笏湖` で出題順を固定できる（デモ動画の撮影用。県の画面座標を `window.demoPrefPos(県ID)` で返す）
+
 ### 問題集 md の書式（パーサが依存する）
 - 見出し: `### 問N [論点: ○○]`（`[論点: ...]` が topic になる）
 - 選択肢: `- ア. 本文`（半角/全角ピリオド・先頭 `- ` の有無は吸収）
@@ -82,6 +97,7 @@ python3 -m http.server 8731   # → http://localhost:8731/index.html
 - リポジトリ `kasei-san/domtrip`（public）、Pages source = `main` / `(root)`。公開URLは <https://kasei-san.com/domtrip/>（`kasei-san.github.io/domtrip/` はリダイレクト）。
 - **ブランチ → PR → main へマージで数十秒後に自動デプロイ**（main への直接 push はしない）。
 - **キャッシュ更新チェックリスト**: 公開ページの見た目・挙動を変えたら、`sw.js` の `CACHE`（`domtrip-vN`）を上げ、**7つの HTML に埋め込まれたバージョン表示行も同じ版に揃える**。場所は `grep -n "ver\. " *.html` で探す（`index.html` / `dashboard.html` / `ox.html` / `cram-sheet.html` / `study-plan.html` / `app-spec.html` / `japan-map.html`）。
+  - `japan-map.html`・`japan_geo.js`・`geo_quiz_data.js` は `ASSETS` に入っていないが、`sw.js` はどのページの GET もキャッシュ優先で返すので、**これらを変える PR も CACHE を上げる**（一度開いた端末には古い版が出続ける）。
   - **`app_data.js` の中身が変わる PR は、変更元が `questions/*.md` でも `ox_data.js` でも常に対象**（HTML/JSを一切触っていなくても該当する）。`app_data.js` は `sw.js` の `ASSETS` に含まれるキャッシュ対象そのものなので、CACHE を上げないと既にインストール済みの端末には新データが届かない。実際に #22（questions/*.mdのみ変更）でこれを一度見落とし、科目3の4択が「対象問題なし」になった（2026-09-22に発生・同日 #23 で修正）。
 - `cram-sheet.html` / `study-plan.html` / `app-spec.html` は対応する md から pandoc で生成した HTML だが、**バージョン表示行は生成後に手で挿入されている**。再生成コマンドは記録されていないので、pandoc で作り直す場合はバージョン行を再挿入すること。
 - iOS は file:// だと localStorage 不可なので必ず https URL から使う。

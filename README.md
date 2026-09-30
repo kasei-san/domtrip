@@ -7,6 +7,7 @@
 - 📊 **ダッシュボード**: <https://kasei-san.com/domtrip/dashboard.html>
 - 🫛 **1行暗記○×（やる気ゼロの日用）**: <https://kasei-san.com/domtrip/ox.html>
 - 📝 **暗記シート（通勤用）**: <https://kasei-san.com/domtrip/cram-sheet.html>
+- 🗾 **3D日本地図 観光地当てクイズ**: <https://kasei-san.com/domtrip/japan-map.html>
 
 ## 何があるか
 
@@ -15,6 +16,9 @@
 | `index.html` | 過去問クイズアプリ（4択・解答リビュー・暗記カード・苦手復習）。進捗は localStorage に保存 |
 | `dashboard.html` | 到達度・正答率・周回・連続日数・カウントダウンを表示。アプリと同じ進捗をライブ集計 |
 | `ox.html` / `ox-cards.md` / `ox_data.js` | 1行暗記○×アプリ。「覚える1行→○×1問」を繰り返し、範囲ごとの周回数を表示。進捗は別キーの localStorage |
+| `japan-map.html` | 3D日本地図の観光地当てクイズ（10秒タイマー・正解の県が飛び出して観光地が点滅・写真表示）。「地図」ボタンで自由に触れるモード。進捗は保存しない。three.js・フォント・写真はネットから読むのでオフラインでは動かない |
+| `japan_geo.js` / `geo_quiz_data.js` | 地図の形（`tools/build_japan_geo.py` が生成）とクイズ問題（`tools/build_geo_quiz.py` が生成）。どちらも編集禁止 |
+| `tools/src/` | 地図の元データ（地球地図日本の TopoJSON）・観光地の座標表 `geo_spots.tsv`・写真の一覧 `geo_images.json` |
 | `app_data.js` | アプリが読む問題データ（`tools/build_app_data.py` が生成・編集禁止） |
 | `sw.js` / `manifest.webmanifest` / `icon.svg` | PWA用（ホーム画面追加でオフライン動作） |
 | `questions/` | 過去問を構造化した Markdown（科目1旅行業法 / 科目2約款 / 科目3国内旅行実務 × R03〜R07） |
@@ -76,6 +80,17 @@ iOS Safari は `file://` だと localStorage が使えない（進捗が保存�
 ```sh
 python3 tools/build_app_data.py
 ```
+
+### 観光地当てクイズを更新したら
+問題は `cram-sheet.md` の「観光地理 暗記リスト」から作る。項目を足したら座標と写真も足して再生成する:
+
+```sh
+# tools/src/geo_spots.tsv に「項目名<TAB>緯度,経度」を足す（料理など地点がないものは -）
+python3 tools/fetch_geo_images.py   # 新しい項目の写真を Wikipedia から探す（要ネット接続）
+python3 tools/build_geo_quiz.py     # 座標が別の県に入っているとエラーになる
+```
+
+地図・写真の出典: 地図は地球地図日本（国土地理院）を [dataofjapan/land](https://github.com/dataofjapan/land) 経由で加工。写真は Wikipedia 日本語版の各記事の代表画像（Wikimedia Commons）で、画像ファイルはリポジトリに置かず表示時に読み込む。
 
 ## 注意
 
