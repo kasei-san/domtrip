@@ -314,6 +314,12 @@ const tmpOff = new THREE.Vector3(), tmpDir = new THREE.Vector3(), spinQuat = new
 const POP_SEC = 1.1, SPIN_TURNS = 2;
 const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 // 進み具合 t（0=地図上, 1=手前）を時間で動かし、途中は画面の縦軸まわりに回しながら寄せる
+// 飛び出した県の見た目の大きさ。どの県もここまで拡大する（画面の縦横の短いほうの8割が上限）
+const POP_DIST = 16;
+function popTarget() {
+  const h = 2 * POP_DIST * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+  return Math.min(h, h * camera.aspect) * 0.8;
+}
 function animate(dt) {
   camera.getWorldDirection(tmpDir);
   upAxis.copy(Y_AXIS).applyQuaternion(camera.quaternion);
@@ -323,10 +329,10 @@ function animate(dt) {
     if (u.t === undefined) u.t = 0;
     if (u.t === goal && goal === 0) continue;
     u.t = goal ? Math.min(1, u.t + dt / POP_SEC) : Math.max(0, u.t - dt / POP_SEC);
-    if (u.t === 0) resetFocus(u); // 戻りきってから焦点を戻す（途中で戻すと位置と大きさが跳ねる）
+    if (!goal && u.t === 0) resetFocus(u); // 戻りきってから焦点を戻す（途中で戻すと位置と大きさが跳ねる）
     const e = easeInOut(u.t);
-    tmpPos.copy(camera.position).addScaledVector(tmpDir, 16);
-    const scale = 1 + (3.2 / u.popSize - 1) * e;
+    tmpPos.copy(camera.position).addScaledVector(tmpDir, POP_DIST).addScaledVector(upAxis, popTarget() * 0.12); // 県名の上に来るよう少し上げる
+    const scale = 1 + (popTarget() / u.popSize - 1) * e;
     group.scale.setScalar(scale);
     tmpQuat.slerpQuaternions(identity, camera.quaternion, e);
     spinQuat.setFromAxisAngle(upAxis, (1 - e) * SPIN_TURNS * Math.PI * 2);
@@ -393,9 +399,14 @@ function showMarker(group, points) {
   const fb = u.box.clone();
   for (const [x, y] of points) fb.expandByPoint(new THREE.Vector2(x, y));
   const fc = fb.getCenter(new THREE.Vector2());
+  // 下の特大の県名や写真に印が隠れないよう、正面に来る点を観光地の方へ半分寄せる
+  if (points.length) {
+    const pc = points.reduce((a, [x, y]) => a.add(new THREE.Vector2(x, y)), new THREE.Vector2()).divideScalar(points.length);
+    fc.lerp(pc, 0.5);
+  }
   u.focus.set(fc.x - c.x, fc.y - c.y, 0);
-  u.popSize = Math.max(fb.max.x - fb.min.x, fb.max.y - fb.min.y) * 1.15;
-  const k = u.popSize / 3.2;
+  u.popSize = Math.max(fb.max.x - fb.min.x, fb.max.y - fb.min.y) * 1.3;
+  const k = (u.popSize / popTarget()) * 1.4; // 県を大きくした分、印も少し大きく
   marker = new THREE.Group();
   for (const [x, y] of points) {
     const at = (o, z) => { o.position.set(x - c.x, y - c.y, DEPTH + z); o.renderOrder = 20; marker.add(o); return o; };
